@@ -1,99 +1,113 @@
-<!-- File: index.html -->
-<!-- MIT License — https://github.com/AllieBaig/WordAtlas/blob/main/LICENSE -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <!-- MIT License – AllieBaig – https://github.com/AllieBaig/naptpwa/blob/main/LICENSE -->
+
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>WordAtlas</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="theme-color" content="#0055aa" />
+  <meta name="description" content="NAPT Word Game - Modular PWA" />
+  <title>NAPT Word Game</title>
+
+  <!-- Settings preload -->
+  <script>
+    (() => {
+      const root = document.documentElement;
+      const font = localStorage.getItem('napt-font');
+      const theme = localStorage.getItem('napt-theme');
+      const contrast = localStorage.getItem('napt-contrast');
+      if (font) root.classList.add(`font-${font}`);
+      if (theme === 'light' || theme === 'dark') root.classList.add(`theme-${theme}`);
+      if (contrast === 'true') root.classList.add('theme-high-contrast');
+    })();
+  </script>
+
+  <link href="https://fonts.googleapis.com/css2?family=Domine&family=Lora&family=Merriweather&family=Tinos&display=swap" rel="stylesheet" />
   <link rel="manifest" href="manifest.json" />
   <link rel="stylesheet" href="styles/main.css" />
   <link rel="icon" href="icons/icon-192.png" type="image/png" />
-  <meta name="theme-color" content="#0055aa" />
 </head>
 
 <body>
-  <!-- Header -->
   <header>
-    <h1>WordAtlas</h1>
+    <h1>NAPT Word Game</h1>
     <p>Select a mode to begin</p>
   </header>
 
-  <!-- Main Menu -->
   <main id="menu" class="active">
-    <section class="mode-buttons">
+    <div id="mode-buttons" class="mode-buttons">
       <button class="menu-btn" data-mode="regular">🧠 Solo Mode</button>
       <button class="menu-btn" data-mode="wordRelic">🏺 Word Relic</button>
       <button class="menu-btn" data-mode="wordSafari">🦁 Word Safari</button>
       <button class="menu-btn" data-mode="dice">🎲 Dice Challenge</button>
       <button class="menu-btn" data-mode="atlas">🗺️ Word Atlas</button>
-      <button class="menu-btn" data-mode="trail">🪄 Trail of Letters</button>
       <button class="menu-btn" data-mode="versus">🤖 Play vs Computer</button>
+      <button class="menu-btn" data-mode="trail">🪄 Trail of Letters</button>
       <button class="menu-btn" data-mode="nearby">📍 Play Nearby</button>
-    </section>
+    </div>
+
+    <details id="settings-panel" style="padding: 1rem; max-width: 800px; margin: auto;">
+      <summary><strong>⚙️ Settings</strong></summary>
+      <div style="margin-top: 1rem;">
+        <label for="fontSelector">Font:</label><br/>
+        <select id="fontSelector">
+          <option value="">System Default</option>
+          <option value="domine">Domine</option>
+          <option value="merriweather">Merriweather</option>
+          <option value="lora">Lora</option>
+          <option value="tinos">Tinos</option>
+        </select><br/>
+
+        <label for="themeSelector">Theme:</label><br/>
+        <select id="themeSelector">
+          <option value="system">System Default</option>
+          <option value="light">Light</option>
+          <option value="dark">Dark</option>
+        </select><br/>
+
+        <label><input type="checkbox" id="highContrastToggle" /> High Contrast Mode</label><br/>
+        <label><input type="checkbox" id="voiceHelpToggle" /> Voice Instructions</label><br/>
+        <label><input type="checkbox" id="resumeToggle" /> Resume Last Game on Load</label><br/>
+
+        <label for="difficultySelector">Difficulty:</label><br/>
+        <select id="difficultySelector">
+          <option value="easy">Easy</option>
+          <option value="medium">Medium</option>
+          <option value="hard">Hard</option>
+        </select><br/>
+
+        <label for="radiusSelector">Map Radius (for Nearby Mode):</label><br/>
+        <select id="radiusSelector">
+          <option value="3">3 km</option>
+          <option value="10" selected>10 km</option>
+          <option value="50">50 km</option>
+          <option value="200">200 km</option>
+        </select>
+      </div>
+    </details>
   </main>
 
-  <!-- Game Area -->
-  <section id="game" class="game-container"></section>
+  <div id="game" class="game-container"></div>
 
-  <!-- Footer -->
-  <footer style="text-align:center; font-size:0.85rem; margin-top:2rem;">
-    <span id="verInfo" style="font-weight:bold; padding:0.3rem 0.6rem; border-radius:6px;"></span> |
-    <a href="scripts/utils/error-log.html" target="_blank">🐞 Error Log</a>
-  </footer>
-
-  <!-- Version Toggle (Debug Only) -->
-  <button id="versionToggleBtn" style="display:none; position: fixed; bottom: 1rem; right: 1rem;">
-    Toggle Version
-  </button>
-
-  <!-- Dynamic Loader -->
-  <script type="module">
-    const versionKey = 'wordatlas-version';
-    const version = localStorage.getItem(versionKey) || 'v-latest';
-
-    const roots = {
-      'v-latest': './scripts/',
-      'v-site1': './Site1/scripts/',
-      'v-dev': './Site2/scripts/'
-    };
-    const root = roots[version] || './scripts/';
-
-    async function loadSafe(file) {
-      try {
-        await import(root + file);
-        console.log(`✅ Loaded ${file} from ${version}`);
-      } catch (err) {
-        console.error(`❌ Failed: ${file} from ${version}`, err);
-      }
-    }
-
-    loadSafe('main.js');
-    loadSafe('gameNavigation.js');
-
-    const verBox = document.getElementById('verInfo');
-    verBox.textContent = `Mode: ${version}`;
-    verBox.style.background = {
-      'v-latest': '#2d8fdd',
-      'v-site1': '#888',
-      'v-dev': '#e97a00'
-    }[version] || '#444';
-    verBox.style.color = '#fff';
-
-    if (location.search.includes('debug')) {
-      document.getElementById('versionToggleBtn').style.display = 'block';
-    }
-
-    document.getElementById('versionToggleBtn')?.addEventListener('click', () => {
-      const current = localStorage.getItem(versionKey) || 'v-latest';
-      const next = current === 'v-latest' ? 'v-site1' : current === 'v-site1' ? 'v-dev' : 'v-latest';
-      localStorage.setItem(versionKey, next);
-      alert(`🔁 Switched to ${next}. Reloading...`);
-      location.reload();
-    });
-  </script>
-
-  <!-- PWA Registration -->
+  <!-- Scripts -->
+  <script type="module" src="scripts/gameNavigation.js"></script>
   <script src="scripts/serviceWorkerRegistration.js"></script>
+  <script type="module">
+    import { applyUserSettings } from './scripts/utils/settings.js';
+    import { injectResetPWA } from './scripts/utils/debugTools.js';
+    import { getLastMode } from './scripts/utils/autosave.js';
+    import { navigateToMode } from './scripts/gameNavigation.js';
+    import './scripts/utils/errorHandler.js';
+
+    applyUserSettings();
+    injectResetPWA();
+
+    const shouldResume = localStorage.getItem('napt-resume') === 'true';
+    const lastMode = getLastMode();
+    if (shouldResume && lastMode) {
+      navigateToMode(lastMode);
+    }
+  </script>
 </body>
 </html>
+
