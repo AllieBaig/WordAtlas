@@ -1,12 +1,6 @@
-<!-- 
-File: index.html
-WordAtlas main PWA with fallback, settings, stats, and dev footer links
+<!-- File: index.html -->
+<!-- License: MIT — https://github.com/AllieBaig/WordAtlas/blob/main/LICENSE -->
 
-MIT License
-Copyright (c) 2025 AllieBaig
-Licensed under the MIT License.
-https://github.com/AllieBaig/WordAtlas/blob/main/LICENSE
--->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -17,39 +11,16 @@ https://github.com/AllieBaig/WordAtlas/blob/main/LICENSE
   <link rel="manifest" href="manifest.json" />
   <link rel="stylesheet" href="styles/main.css" />
   <link rel="icon" href="icons/icon-192.png" />
-  <link href="https://fonts.googleapis.com/css2?family=Domine&family=Merriweather&family=Tinos&family=Lora&display=swap" rel="stylesheet" />
-
-  <style>
-    .fallback-banner {
-      background: #f44336;
-      color: white;
-      font-weight: bold;
-      text-align: center;
-      padding: 0.6rem;
-      font-size: 1rem;
-      display: none;
-    }
-    body.fallback-active .fallback-banner {
-      display: block;
-    }
-    #statsOutput {
-      font-family: monospace;
-      white-space: pre-wrap;
-      font-size: 0.9em;
-      padding: 0.5em;
-      display: none;
-    }
-  </style>
 </head>
 
 <body>
-  <div class="fallback-banner">
-    🛟 <strong>Live from Site1 Backup</strong> — Original scripts failed, fallback activated.
+  <div class="fallback-banner" style="display:none;">
+    🛟 <strong>Site1 Backup Active</strong>
   </div>
 
   <header>
     <h1>WordAtlas</h1>
-    <p>Explore words, origins, and relics</p>
+    <p>Select a mode to begin</p>
   </header>
 
   <main id="menu" class="active">
@@ -63,25 +34,14 @@ https://github.com/AllieBaig/WordAtlas/blob/main/LICENSE
       <button class="menu-btn" data-mode="versus">🤖 Play vs Computer</button>
       <button class="menu-btn" data-mode="nearby">📍 Play Nearby</button>
     </section>
-
-    <details>
-      <summary><strong>⚙️ Settings</strong></summary>
-      <label><input type="checkbox" id="useSite1Toggle" /> Force Site1 fallback</label><br />
-      <label for="fontSelect">Font:</label>
-      <select id="fontSelect"></select><br />
-      <label><input type="checkbox" id="emojiToggle" checked /> Show Emojis</label><br />
-      <button id="viewStatsBtn">📊 View Gameplay Stats</button>
-      <button id="exportStatsBtn">📁 Export Stats (JSON)</button>
-      <div id="statsOutput"></div>
-    </details>
   </main>
 
   <section id="game" class="game-container"></section>
 
   <footer style="text-align:center; font-size:0.85rem; margin-top:2rem;">
     <a href="scripts/utils/error-log.html" target="_blank">🐞 View Error Log</a>
-    <details id="debugLinks" style="display:none; margin-top: 1em;">
-      <summary>🧪 Dev Links</summary>
+    <details id="debugLinks" style="display:none;">
+      <summary>🧪 Dev Tools</summary>
       <p>
         <a href="index.html">Main</a> |
         <a href="index-original">Original</a> |
@@ -90,92 +50,36 @@ https://github.com/AllieBaig/WordAtlas/blob/main/LICENSE
     </details>
   </footer>
 
+  <!-- Toast Notification -->
+  <div id="toast" style="display:none;"></div>
+
+  <!-- Load fallback-aware scripts -->
   <script type="module">
-    const forceSite1 = localStorage.getItem('wordatlas-use-site1') === 'true';
-    const primary = './scripts/';
     const fallback = './Site1/scripts/';
-    const modules = ['main.js', 'gameNavigation.js'];
+    const primary = './scripts/';
+    const forceSite1 = localStorage.getItem('wordatlas-use-site1') === 'true';
 
-    function logFallback(reason) {
-      const log = JSON.parse(localStorage.getItem('fallback-events') || '[]');
-      log.push({ type: 'fallback', message: 'Fallback to Site1', source: reason, time: new Date().toISOString() });
-      localStorage.setItem('fallback-events', JSON.stringify(log));
-    }
-
-    for (const file of modules) {
-      const base = forceSite1 ? fallback : primary;
+    async function loadScript(file) {
+      const from = forceSite1 ? fallback : primary;
       try {
-        await import(base + file);
-        console.log(`✅ Loaded: ${file} from ${base}`);
+        await import(from + file);
+        console.log(`✅ Loaded ${file} from ${from}`);
       } catch (err) {
-        console.warn(`⚠️ Failed: ${file} from ${base}, retrying Site1...`);
         if (!forceSite1) {
           try {
             await import(fallback + file);
             document.body.classList.add('fallback-active');
-            logFallback(`Auto-fallback: ${file} failed`);
-          } catch {
-            console.error(`❌ Both original and fallback failed for ${file}`);
+            document.querySelector('.fallback-banner').style.display = 'block';
+            console.warn(`⚠️ Fallback loaded: ${file}`);
+          } catch (e) {
+            console.error(`❌ Failed: ${file} from both paths`, e);
           }
         }
       }
     }
 
-    document.getElementById('useSite1Toggle')?.addEventListener('change', e => {
-      localStorage.setItem('wordatlas-use-site1', e.target.checked);
-      location.reload();
-    });
-
-    import('./scripts/utils/fontControls.js').then(({ initFontSelector }) => {
-      initFontSelector(document.getElementById('fontSelect'));
-    });
-
-    document.getElementById('emojiToggle')?.addEventListener('change', e => {
-      localStorage.setItem('napt-use-emojis', e.target.checked ? 'true' : 'false');
-      location.reload();
-    });
-
-    import('./scripts/utils/statsTracker.js').then(({ getStats, getAggregatedStats }) => {
-      const statsBtn = document.getElementById('viewStatsBtn');
-      const exportBtn = document.getElementById('exportStatsBtn');
-      const output = document.getElementById('statsOutput');
-
-      statsBtn?.addEventListener('click', () => {
-        const summary = getAggregatedStats();
-        if (!Object.keys(summary).length) {
-          output.textContent = 'No gameplay data available yet.';
-          output.style.display = 'block';
-          return;
-        }
-
-        const sorted = Object.entries(summary).sort((a, b) => b[1].count - a[1].count);
-        const top = sorted[0][0];
-
-        output.innerHTML = sorted.map(([mode, stat]) => {
-          const emojis = Object.entries(stat.emojiMap).map(([e, c]) => `${e}×${c}`).join(' ');
-          const trophy = mode === top ? ' 🏆' : '';
-          return `▶️ ${mode}${trophy}\n🕒 ${stat.time}s | 🧩 ${stat.count} plays${emojis ? ' | ' + emojis : ''}`;
-        }).join('\n\n');
-
-        output.style.display = 'block';
-      });
-
-      exportBtn?.addEventListener('click', () => {
-        const stats = getStats();
-        const blob = new Blob([JSON.stringify(stats, null, 2)], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'wordatlas-stats.json';
-        a.click();
-        URL.revokeObjectURL(url);
-      });
-    });
-
-    // Show dev links if enabled
-    if (localStorage.getItem('debugLinks') === 'true') {
-      document.getElementById('debugLinks')?.style.setProperty('display', 'block');
-    }
+    loadScript('main.js');
+    loadScript('gameNavigation.js');
   </script>
 
   <script src="scripts/serviceWorkerRegistration.js"></script>
