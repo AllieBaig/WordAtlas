@@ -40,49 +40,37 @@
 
   <footer style="text-align:center; font-size:0.85rem; margin-top:2rem;">
     <a href="scripts/utils/error-log.html" target="_blank">🐞 View Error Log</a>
-    <details id="debugLinks" style="display:none;">
-      <summary>🧪 Dev Tools</summary>
-      <p>
-        <a href="index.html">Main</a> |
-        <a href="index-original">Original</a> |
-        <a href="index-backup">Backup</a>
-      </p>
-    </details>
   </footer>
 
-  <!-- Toast Notification -->
-  <div id="toast" style="display:none;"></div>
-
-  <!-- Load fallback-aware scripts -->
+  <!-- Load main and nav scripts with fallback logic -->
   <script type="module">
-    const fallback = './Site1/scripts/';
     const primary = './scripts/';
-    const forceSite1 = localStorage.getItem('wordatlas-use-site1') === 'true';
+    const fallback = './Site1/scripts/';
+    const useBackup = localStorage.getItem('wordatlas-use-site1') === 'true';
 
-    async function loadScript(file) {
-      const from = forceSite1 ? fallback : primary;
+    async function loadSafe(file) {
+      const primaryPath = primary + file;
+      const fallbackPath = fallback + file;
+
       try {
-        await import(from + file);
-        console.log(`✅ Loaded ${file} from ${from}`);
-      } catch (err) {
-        if (!forceSite1) {
-          try {
-            await import(fallback + file);
-            document.body.classList.add('fallback-active');
-            document.querySelector('.fallback-banner').style.display = 'block';
-            console.warn(`⚠️ Fallback loaded: ${file}`);
-          } catch (e) {
-            console.error(`❌ Failed: ${file} from both paths`, e);
-          }
+        await import(useBackup ? fallbackPath : primaryPath);
+        console.log(`✅ Loaded ${file}`);
+      } catch (err1) {
+        try {
+          document.body.classList.add('fallback-active');
+          document.querySelector('.fallback-banner').style.display = 'block';
+          await import(fallbackPath);
+          console.warn(`⚠️ Fallback loaded: ${file}`);
+        } catch (err2) {
+          console.error(`❌ Failed to load: ${file}`, err2);
         }
       }
     }
 
-    loadScript('main.js');
-    loadScript('gameNavigation.js');
+    loadSafe('main.js');
+    loadSafe('gameNavigation.js');
   </script>
 
   <script src="scripts/serviceWorkerRegistration.js"></script>
 </body>
 </html>
-
