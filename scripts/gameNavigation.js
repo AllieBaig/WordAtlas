@@ -1,14 +1,13 @@
-
 // File: scripts/gameNavigation.js
 // Features:
-// - Main controller for navigation and UI state
-// - Uses modeLoader, errorUI, and modeMap modules
+// - Binds menu buttons to dynamic game mode loading
+// - Uses modeLoader and modeMap
 //
 // License: MIT — https://github.com/AllieBaig/WordAtlas/blob/main/LICENSE
 
-import { showError } from './utils/errorUI.js';
 import { modeMap } from './utils/modeMap.js';
 import { loadGameMode } from './utils/modeLoader.js';
+import { showError } from './utils/errorUI.js';
 
 export function showMenu() {
   document.getElementById('menu')?.classList.add('active');
@@ -39,3 +38,4 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 });
+
