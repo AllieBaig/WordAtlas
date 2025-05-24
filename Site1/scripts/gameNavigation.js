@@ -2,7 +2,9 @@
 // Fix: Ensure menu buttons work during fallback mode
 // License: MIT — https://github.com/AllieBaig/WordAtlas/blob/main/LICENSE
 
-import { modeMap } from '../utils/modeMap.js';
+//import { modeMap } from '../utils/modeMap.js';
+
+import { modeMap } from '/WordAtlas/scripts/utils/modeMap.js'; ✅
 import { loadGameMode } from '../utils/modeLoader.js';
 import { showMenu } from '../utils/menuVisibility.js';
 import { showError } from '../utils/errorUI.js';
