@@ -1,65 +1,96 @@
-// File: scripts/utils/errorHandler.js
-// Features:
-// - Captures uncaught errors and unhandled promise rejections
-// - Stores errors in localStorage for offline log viewing
-// - Used by error-log.html and toast/banner feedback
-//
-// License: MIT — https://github.com/AllieBaig/WordAtlas/blob/main/LICENSE
-
-const LOG_KEY = 'wordatlas-error-log';
-const MAX_LOG_ENTRIES = 100;
+// error-handler.js
 
 /**
- * Retrieve stored error log from localStorage
+ * Optional remote logger function. Should accept an object: { message, level, timestamp, context }
  */
-export function getErrorLog() {
-  try {
-    return JSON.parse(localStorage.getItem(LOG_KEY)) || [];
-  } catch {
-    return [];
-  }
+let remoteLogger = null;
+
+/**
+ * Configure global error handler options.
+ * @param {Object} options
+ * @param {function} [options.remote] - Remote logging function
+ */
+function configureErrorHandler({ remote } = {}) {
+    if (typeof remote === 'function') {
+        remoteLogger = remote;
+    }
 }
 
 /**
- * Save a new error object to localStorage log
+ * Appends a message to the error log UI container.
+ * @param {string} message
+ * @param {Date} timestamp
  */
-export function logError(errorObj) {
-  const logs = getErrorLog();
-  logs.unshift({ ...errorObj, time: new Date().toLocaleString() });
-
-  if (logs.length > MAX_LOG_ENTRIES) logs.length = MAX_LOG_ENTRIES;
-  localStorage.setItem(LOG_KEY, JSON.stringify(logs));
+function appendErrorToLogUI(message, timestamp) {
+    const errorLogContainer = document.getElementById('errorLog');
+    if (errorLogContainer) {
+        const entry = document.createElement('li');
+        entry.textContent = `${timestamp.toISOString()}: ${message}`;
+        errorLogContainer.appendChild(entry);
+    }
 }
 
 /**
- * Clear the stored error log
+ * Logs an error locally and optionally remotely.
+ * @param {string} message - The error message
+ * @param {'info'|'warn'|'error'} [level='error'] - Severity level
+ * @param {Object} [context] - Additional context for logging
  */
-export function clearErrorLog() {
-  localStorage.removeItem(LOG_KEY);
+function logError(message, level = 'error', context = {}) {
+    const timestamp = new Date();
+
+    // Log to UI
+    try {
+        appendErrorToLogUI(message, timestamp);
+    } catch (uiError) {
+        console.error("Failed to append to error log UI:", uiError);
+    }
+
+    // Console
+    console[level](`[${timestamp.toISOString()}] ${message}`, context);
+
+    // Remote logger
+    try {
+        if (remoteLogger) {
+            remoteLogger({ message, level, timestamp, context });
+        }
+    } catch (e) {
+        console.error("Remote logger failed:", e);
+    }
 }
 
 /**
- * Global error capture setup
+ * Attaches a safe event listener with try/catch error logging.
+ * @param {Element} element - The DOM element
+ * @param {string} eventType - The event type (e.g., 'click')
+ * @param {Function} handler - The event handler function
+ * @param {string} [name='unknown'] - Identifier for debugging
  */
-export function registerGlobalErrorHandlers() {
-  window.addEventListener('error', (e) => {
-    logError({
-      type: 'error',
-      message: e.message,
-      source: e.filename,
-      lineno: e.lineno,
-      colno: e.colno,
-      stack: e.error?.stack || null
-    });
-  });
+function attachSafeListener(element, eventType, handler, name = 'unknown') {
+    if (!element) {
+        logError(`Element not found for listener: ${name}`);
+        return;
+    }
 
-  window.addEventListener('unhandledrejection', (e) => {
-    logError({
-      type: 'promise',
-      message: e.reason?.message || String(e.reason),
-      stack: e.reason?.stack || null
-    });
-  });
+    if (typeof handler !== 'function') {
+        logError(`Handler for "${name}" is not a function`);
+        return;
+    }
 
-  console.log('✅ Global error handlers registered');
+    function wrappedHandler(event) {
+        try {
+            handler.call(element, event);
+        } catch (error) {
+            const message = error instanceof Error ? error.message : String(error);
+            logError(`Error in ${eventType} handler for "${name}": ${message}`, 'error', { event, name });
+        }
+    }
+
+    element.addEventListener(eventType, wrappedHandler);
 }
+
+export {
+    configureErrorHandler,
+    logError,
+    attachSafeListener
+};
