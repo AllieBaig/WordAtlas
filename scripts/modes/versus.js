@@ -1,12 +1,11 @@
 // File: scripts/modes/versus.js
-// Features:
-// - Player vs Computer in classic N-P-A-T challenge
-// - Both sides use same random letter
-// - Shows input for user, emoji answers for computer
-//
-// License: MIT — https://github.com/AllieBaig/WordAtlas/blob/main/LICENSE
+// ... (existing comments) ...
 
-import { showGame } from '../utils/menuVisibility.js';
+// Change this line:
+// import { showGame } from '../utils/menuVisibility.js';
+// To this:
+import { hideMenu } from '../utils/menuVisibility.js'; // <-- Import hideMenu instead
+
 import { randomLetter } from '../utils/randomizer.js';
 import { bind, clearAllBindings } from '../utils/eventBinder.js';
 import { logGameSession } from '../utils/statsTracker.js';
@@ -22,7 +21,10 @@ const dummyAnswers = {
 
 export default function init({ showMenu }) {
   clearAllBindings();
-  showGame();
+  // Change this line:
+  // showGame();
+  // To this:
+  hideMenu(); // <-- Use hideMenu to show the game screen
 
   const game = document.getElementById('game');
   const letter = randomLetter();
@@ -48,7 +50,7 @@ export default function init({ showMenu }) {
 
   bind(document.getElementById('submitVs'), 'click', () => {
     const time = Date.now();
-    const emojiSet = ['⚔️', '🎯', '🏆', '📚'];
+    const emojiSet = ['⚔️', '🎯', '🏆', '📚']; // Note: emojiSet is defined but not used here
 
     categories.forEach(cat => {
       const aiEl = document.querySelector(`.ai-answer[data-cat="${cat}"]`);
@@ -69,4 +71,3 @@ export default function init({ showMenu }) {
     showMenu();
   });
 }
-
