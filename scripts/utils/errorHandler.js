@@ -1,54 +1,65 @@
-// MIT License
-// Copyright (c) 2025 AllieBaig
-// https://github.com/AllieBaig/naptpwa/blob/main/LICENSE
+// File: scripts/utils/errorHandler.js
+// Features:
+// - Captures uncaught errors and unhandled promise rejections
+// - Stores errors in localStorage for offline log viewing
+// - Used by error-log.html and toast/banner feedback
+//
+// License: MIT — https://github.com/AllieBaig/WordAtlas/blob/main/LICENSE
 
-const LOG_KEY = 'napt-error-log';
-let errorLog = JSON.parse(localStorage.getItem(LOG_KEY) || '[]');
+const LOG_KEY = 'wordatlas-error-log';
+const MAX_LOG_ENTRIES = 100;
 
+/**
+ * Retrieve stored error log from localStorage
+ */
 export function getErrorLog() {
-  return errorLog;
+  try {
+    return JSON.parse(localStorage.getItem(LOG_KEY)) || [];
+  } catch {
+    return [];
+  }
 }
 
+/**
+ * Save a new error object to localStorage log
+ */
+export function logError(errorObj) {
+  const logs = getErrorLog();
+  logs.unshift({ ...errorObj, time: new Date().toLocaleString() });
+
+  if (logs.length > MAX_LOG_ENTRIES) logs.length = MAX_LOG_ENTRIES;
+  localStorage.setItem(LOG_KEY, JSON.stringify(logs));
+}
+
+/**
+ * Clear the stored error log
+ */
 export function clearErrorLog() {
-  errorLog = [];
   localStorage.removeItem(LOG_KEY);
 }
 
-// Automatically store browser errors globally
-export function captureGlobalErrors() {
-  window.onerror = (msg, src, lineno, colno, err) => {
-    const entry = {
+/**
+ * Global error capture setup
+ */
+export function registerGlobalErrorHandlers() {
+  window.addEventListener('error', (e) => {
+    logError({
       type: 'error',
-      message: msg,
-      source: src,
-      lineno,
-      colno,
-      stack: err?.stack || '',
-      time: new Date().toLocaleString(),
-      version: window.__LAST_LOADED_VERSION || 'unknown'
-    };
-    errorLog.unshift(entry);
-    errorLog = errorLog.slice(0, 50); // limit log length
-    localStorage.setItem(LOG_KEY, JSON.stringify(errorLog));
-  };
+      message: e.message,
+      source: e.filename,
+      lineno: e.lineno,
+      colno: e.colno,
+      stack: e.error?.stack || null
+    });
+  });
 
-  window.onunhandledrejection = (e) => {
-    const entry = {
+  window.addEventListener('unhandledrejection', (e) => {
+    logError({
       type: 'promise',
-      message: e.reason?.message || e.reason,
-      source: '',
-      lineno: '',
-      colno: '',
-      stack: e.reason?.stack || '',
-      time: new Date().toLocaleString(),
-      version: window.__LAST_LOADED_VERSION || 'unknown'
-    };
-    errorLog.unshift(entry);
-    errorLog = errorLog.slice(0, 50);
-    localStorage.setItem(LOG_KEY, JSON.stringify(errorLog));
-  };
+      message: e.reason?.message || String(e.reason),
+      stack: e.reason?.stack || null
+    });
+  });
+
+  console.log('✅ Global error handlers registered');
 }
-
-// Activate immediately
-captureGlobalErrors();
-
