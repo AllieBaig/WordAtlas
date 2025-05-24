@@ -1,52 +1,62 @@
-// MIT License
-// Copyright (c) 2025 AllieBaig
-// https://github.com/AllieBaig/naptpwa/blob/main/LICENSE
+// File: scripts/modes/wordRelic.js
+// MIT License — https://github.com/AllieBaig/WordAtlas/blob/main/LICENSE
 
-import { relicClues } from '../utils/clues.js';
-import { saveHistoryEntry, renderHistoryList } from '../utils/history.js';
-import { updateStreakUI } from '../utils/streak.js';
+import { hideMenu } from '../utils/menuVisibility.js';
+import { getClueSet } from '../utils/clues.js';
 
-export function init({ showMenu }) {
+export default function init({ showMenu }) {
+  hideMenu();
+
   const game = document.getElementById('game');
   if (!game) return;
 
-  const relic = relicClues[Math.floor(Math.random() * relicClues.length)];
+  const clues = getClueSet(); // returns { clue, answerSet: { name, place, animal, thing } }
 
   game.innerHTML = `
-    <h2>🏺 Word Relic</h2>
-    <p>Guess the one word that connects all four clues.</p>
-    <ul>${relic.clues.map(clue => `<li>${clue}</li>`).join('')}</ul>
-    <form id="relic-form">
-      <input type="text" id="relic-input" placeholder="Your guess..." required />
-      <button type="submit">Submit</button>
+    <div class="mode-header">
+      <button onclick="(${showMenu.toString()})()">⬅️ Back</button>
+      <h2>🏺 Word Relic</h2>
+    </div>
+    <p><strong>Clue:</strong> ${clues.clue}</p>
+
+    <form id="relicForm">
+      <label>Name: <input type="text" name="name" required></label><br>
+      <label>Place: <input type="text" name="place" required></label><br>
+      <label>Animal: <input type="text" name="animal" required></label><br>
+      <label>Thing: <input type="text" name="thing" required></label><br>
+      <button type="submit">🔍 Submit Answers</button>
     </form>
-    <div id="relic-feedback" class="feedback"></div>
-    <details><summary>🗃️ Past Correct Relics</summary><ul id="historyList"></ul></details>
-    <div id="streakDisplay"></div>
-    <button class="back-btn">◀ Back to Menu</button>
+
+    <div id="relicFeedback" style="margin-top:1rem;"></div>
   `;
 
-  document.getElementById('relic-form').onsubmit = e => {
+  document.getElementById('relicForm').addEventListener('submit', (e) => {
     e.preventDefault();
-    const input = document.getElementById('relic-input').value.trim().toLowerCase();
-    const feedback = document.getElementById('relic-feedback');
-    if (input === relic.answer.toLowerCase()) {
-      feedback.textContent = '✅ Correct!';
-      feedback.style.color = 'green';
-      saveHistoryEntry(relic.answer, 'word-relic-history');
-      renderHistoryList('historyList', 'word-relic-history');
-      updateStreakUI('streakDisplay', 'word-relic');
-    } else {
-      feedback.textContent = '❌ Try again!';
-      feedback.style.color = 'red';
+    const data = Object.fromEntries(new FormData(e.target).entries());
+    const results = [];
+
+    for (const key of ['name', 'place', 'animal', 'thing']) {
+      const correct = clues.answerSet[key].toLowerCase();
+      const userAns = (data[key] || '').toLowerCase();
+      results.push({
+        category: key,
+        isCorrect: userAns === correct,
+        correct,
+        userAns
+      });
     }
-  };
 
-  document.querySelector('.back-btn')?.addEventListener('click', showMenu);
-  renderHistoryList('historyList', 'word-relic-history');
-  updateStreakUI('streakDisplay', 'word-relic');
+    const out = results.map(r =>
+      r.isCorrect
+        ? `✅ ${r.category}: ${r.userAns}`
+        : `❌ ${r.category}: ${r.userAns || '(blank)'} — Answer: ${r.correct}`
+    ).join('<br>');
 
-  document.querySelector('main')?.classList.remove('active');
-  game.classList.add('active');
+    document.getElementById('relicFeedback').innerHTML = `
+      <h4>Results:</h4>
+      ${out}
+      <p>🧩 Thanks for restoring this relic!</p>
+    `;
+  });
 }
 
