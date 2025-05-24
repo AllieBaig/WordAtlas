@@ -10,6 +10,17 @@ import { versionMap } from './utils/version.js'; // <-- CHANGE THIS LINE: Import
 // Initialize error logging globally
 registerGlobalErrorHandlers();
 
+// File: scripts/main.js
+// ...
+//registerGlobalErrorHandlers();
+
+// TEMPORARY: Force an error to test the log
+// This will cause a ReferenceError because 'nonExistentVariable' is not defined
+console.log(nonExistentVariable);
+
+// Initialize user interface modules
+// ... (rest of your code)
+
 // Initialize user interface modules
 initFontControls();
 initSettingsPanel();
