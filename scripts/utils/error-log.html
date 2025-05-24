@@ -1,71 +1,71 @@
+<!-- File: scripts/utils/error-log.html -->
+<!-- License: MIT — https://github.com/AllieBaig/WordAtlas/blob/main/LICENSE -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Error Log</title>
+  <title>🛠️ Error Log Viewer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     body {
       font-family: system-ui, sans-serif;
+      background: #f5f5f5;
+      margin: 0;
+      padding: 1rem;
+    }
+    h1 {
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+    }
+    #log {
       background: #111;
       color: #eee;
       padding: 1rem;
-    }
-    h2 {
-      text-align: center;
-    }
-    .error-entry {
-      background: #1a1a1a;
-      border: 1px solid #444;
-      padding: 1rem;
-      margin: 1rem 0;
       border-radius: 0.5rem;
+      font-family: monospace;
+      max-height: 80vh;
+      overflow-y: auto;
+      white-space: pre-wrap;
     }
-    .error-entry strong {
-      color: #f66;
-    }
-    .error-entry small {
-      color: #aaa;
-    }
-    #clearErrorLogBtn {
-      display: block;
-      margin: 1rem auto;
+    button {
+      margin-top: 1rem;
       padding: 0.5rem 1rem;
-      font-size: 1rem;
+      background: #c00;
+      color: white;
+      border: none;
+      border-radius: 4px;
     }
   </style>
 </head>
 <body>
-  <h2>🐞 Error Log Viewer</h2>
-  <button id="clearErrorLogBtn">Clear Error Log</button>
-  <div id="errorList"></div>
+  <h1>🪵 WordAtlas Error Log</h1>
+  <div id="log">Loading errors...</div>
+  <button onclick="clearLog()">Clear Log</button>
 
   <script type="module">
     import { getErrorLog, clearErrorLog } from './errorHandler.js';
 
-    const container = document.getElementById('errorList');
-    const logs = getErrorLog();
+    const logBox = document.getElementById('log');
+    const entries = getErrorLog();
 
-    if (logs.length === 0) {
-      container.innerHTML = "<p>No errors recorded.</p>";
+    if (!entries.length) {
+      logBox.textContent = '✅ No errors recorded.';
     } else {
-      container.innerHTML = logs.map(e => `
-        <div class="error-entry">
-          <strong>${e.type.toUpperCase()}</strong>: ${e.message}<br/>
-          <small>${e.source} [${e.lineno}:${e.colno}]</small><br/>
-          <small><em>${e.time}</em> — <code>${e.version || 'unknown'}</code></small>
-          <pre>${e.stack || ''}</pre>
-        </div>
-      `).join('');
+      logBox.innerHTML = entries.map(e => {
+        return `🔸 ${e.time}
+${e.type.toUpperCase()}: ${e.message}
+${e.source || ''}  [${e.lineno || '?'}:${e.colno || '?'}]
+${e.stack || ''}
+-----------------------------------------`;
+      }).join('\n');
     }
 
-    document.getElementById('clearErrorLogBtn').addEventListener('click', () => {
-      if (confirm("Clear all error logs?")) {
+    window.clearLog = () => {
+      if (confirm('Clear all logged errors?')) {
         clearErrorLog();
-        container.innerHTML = "<p>Error log cleared.</p>";
+        logBox.textContent = '✅ Log cleared.';
       }
-    });
+    };
   </script>
 </body>
 </html>
-
