@@ -1,14 +1,14 @@
 // File: scripts/utils/randomizer.js
 // Features:
-// - Provides reusable functions for shuffling, picking random items
-// - Ensures no repeat of correct answers if desired
-// - Can be used across modes like Dice, Safari, Word Relic, Trail
+// - Reusable random tools for games: shuffle, pick, no-repeat, letter
+// - Supports unique question pulls per session
+// - Ideal for Dice, Trail, Safari, Versus, and Relic modes
 //
 // License: MIT — https://github.com/AllieBaig/WordAtlas/blob/main/LICENSE
 
 /**
- * Shuffle an array using Fisher-Yates algorithm.
- * @param {Array} array 
+ * Fisher-Yates shuffle algorithm
+ * @param {Array} array
  * @returns {Array} shuffled copy
  */
 export function shuffleArray(array) {
@@ -21,40 +21,54 @@ export function shuffleArray(array) {
 }
 
 /**
- * Pick one random item from array.
- * @param {Array} list 
- * @returns random item
+ * Pick one random item from list
+ * @param {Array} list
+ * @returns any
  */
 export function pickRandom(list) {
   return list[Math.floor(Math.random() * list.length)];
 }
 
 /**
- * Pick a random item NOT in usedSet (e.g., previous correct answers)
- * @param {Array} list 
- * @param {Set} usedSet 
- * @returns item or null
+ * Pick N unique items from an array
+ * @param {Array} list
+ * @param {number} count
+ */
+export function pickMany(list, count = 1) {
+  return shuffleArray(list).slice(0, count);
+}
+
+/**
+ * Pick one item not in `usedSet`
+ * @param {Array} list
+ * @param {Set} usedSet
  */
 export function pickUniqueRandom(list, usedSet = new Set()) {
-  const filtered = list.filter(item => !usedSet.has(item));
-  if (!filtered.length) return null;
-  return pickRandom(filtered);
+  const available = list.filter(item => !usedSet.has(item));
+  return available.length ? pickRandom(available) : null;
 }
 
 /**
- * Random alphabet letter (A-Z)
+ * Pick a letter from A-Z
+ * @returns {string} single uppercase letter
  */
 export function randomLetter() {
-  const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-  return letters[Math.floor(Math.random() * letters.length)];
+  const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  return alphabet[Math.floor(Math.random() * alphabet.length)];
 }
 
 /**
- * Pick N unique items from array
- * @param {Array} array 
- * @param {Number} count 
+ * Generate a randomized category challenge (e.g. Dice or Trail)
+ * @param {Array} categories
+ * @param {Set} seenCombos
+ * @returns {Object} like { letter: 'M', categories: ['Name', 'Animal', 'Place'] }
  */
-export function pickMany(array, count = 1) {
-  return shuffleArray(array).slice(0, count);
+export function generateCategoryChallenge(categories = ['Name', 'Place', 'Animal', 'Thing'], seenCombos = new Set()) {
+  const letter = randomLetter();
+  const picked = pickMany(categories, 3);
+  const key = `${letter}-${picked.join('-')}`;
+  if (seenCombos.has(key)) return generateCategoryChallenge(categories, seenCombos);
+  seenCombos.add(key);
+  return { letter, categories: picked };
 }
 
