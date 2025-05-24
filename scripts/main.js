@@ -1,28 +1,28 @@
-import { initializeRegularGame } from './regularGame.js';
-import { initializeWordRelic } from './wordRelic.js';
-import { initializeWordSafari } from './wordSafari.js';
-import { initializeDiceChallenge } from './diceChallenge.js';
-import { initializeWordAtlas } from './wordAtlas.js';
+// File: scripts/main.js
+// MIT License — https://github.com/AllieBaig/WordAtlas/blob/main/LICENSE
 
-import './utils.js';
-import './auth.js';
-import './core.js';
-import './debug.js';
-import './error-handler.js';
-import './game-logic.js';
-import './game-ui.js';
-import './gameNavigation.js';
-import './probe.js';
-import './safari-content.js';
-import './service-worker.js';
-import './serviceWorkerRegistration.js';
-import './uiUpdates.js';
-import './wireframeGenerator.js';
+import { registerGlobalErrorHandlers } from './utils/errorHandler.js';
+import { initFontControls } from './utils/fontControls.js';
+import { initSettingsPanel } from './utils/settings.js';
+import { injectDebugTools } from './utils/debugTools.js';
+import { appVersion } from './utils/version.js';
 
-document.addEventListener('DOMContentLoaded', () => {
-  initializeRegularGame();
-  initializeWordRelic();
-  initializeWordSafari();
-  initializeDiceChallenge();
-  initializeWordAtlas();
-});
+// Initialize error logging globally
+registerGlobalErrorHandlers();
+
+// Initialize user interface modules
+initFontControls();
+initSettingsPanel();
+
+// Inject debug panel if "?debug" is in URL
+if (location.search.includes('debug')) {
+  injectDebugTools();
+}
+
+// Show version mode visually in footer
+const footer = document.getElementById('verInfo');
+if (footer) {
+  const mode = localStorage.getItem('wordatlas-version') || 'v-latest';
+  footer.textContent = `Mode: ${mode} | v${appVersion}`;
+}
+
