@@ -1,48 +1,72 @@
-// MIT License
-// Copyright (c) 2025 AllieBaig
-// https://github.com/AllieBaig/naptpwa/blob/main/LICENSE
+// File: scripts/modes/versus.js
+// Features:
+// - Player vs Computer in classic N-P-A-T challenge
+// - Both sides use same random letter
+// - Shows input for user, emoji answers for computer
+//
+// License: MIT — https://github.com/AllieBaig/WordAtlas/blob/main/LICENSE
 
-export function init({ showMenu }) {
+import { showGame } from '../utils/menuVisibility.js';
+import { randomLetter } from '../utils/randomizer.js';
+import { bind, clearAllBindings } from '../utils/eventBinder.js';
+import { logGameSession } from '../utils/statsTracker.js';
+
+const categories = ['Name', 'Place', 'Animal', 'Thing'];
+
+const dummyAnswers = {
+  Name: ['Alice', 'Bob', 'Mira', 'Zane'],
+  Place: ['Paris', 'Delhi', 'Mars', 'Zoo'],
+  Animal: ['Lion', 'Ant', 'Zebra', 'Otter'],
+  Thing: ['Ring', 'Net', 'Pen', 'Umbrella']
+};
+
+export default function init({ showMenu }) {
+  clearAllBindings();
+  showGame();
+
   const game = document.getElementById('game');
-  if (!game) return;
+  const letter = randomLetter();
 
-  const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-  const letter = letters[Math.floor(Math.random() * letters.length)];
+  const inputs = categories.map(cat => `
+    <tr>
+      <td>${cat}</td>
+      <td><input name="${cat}" placeholder="Your answer..." /></td>
+      <td class="ai-answer" data-cat="${cat}">🤖</td>
+    </tr>
+  `).join('');
 
   game.innerHTML = `
-    <h2>🤖 Versus Mode</h2>
-    <p>Enter answers starting with: <strong>${letter}</strong></p>
-    <form id="versus-form">
-      <label>Name: <input type="text" name="name" required /></label>
-      <label>Place: <input type="text" name="place" required /></label>
-      <label>Animal: <input type="text" name="animal" required /></label>
-      <label>Thing: <input type="text" name="thing" required /></label>
-      <button type="submit">Submit</button>
-    </form>
-    <div id="versus-feedback" class="feedback"></div>
-    <button class="back-btn">◀ Back to Menu</button>
+    <h2>🤖 Play vs Computer</h2>
+    <p>Give words starting with: <strong>${letter}</strong></p>
+    <table>
+      <thead><tr><th>Category</th><th>You</th><th>Computer</th></tr></thead>
+      <tbody>${inputs}</tbody>
+    </table>
+    <button id="submitVs">Submit</button>
+    <button id="backToMenu">🔙 Back</button>
   `;
 
-  const form = document.getElementById('versus-form');
-  const feedback = document.getElementById('versus-feedback');
+  bind(document.getElementById('submitVs'), 'click', () => {
+    const time = Date.now();
+    const emojiSet = ['⚔️', '🎯', '🏆', '📚'];
 
-  form.onsubmit = e => {
-    e.preventDefault();
-    const formData = new FormData(form);
-    const values = Object.values(Object.fromEntries(formData));
-    const valid = values.every(val => val.trim().toUpperCase().startsWith(letter));
+    categories.forEach(cat => {
+      const aiEl = document.querySelector(`.ai-answer[data-cat="${cat}"]`);
+      const compWord = dummyAnswers[cat].find(w => w.startsWith(letter)) || '—';
+      aiEl.textContent = compWord;
+    });
 
-    if (valid) {
-      feedback.textContent = `✅ All answers start with ${letter}! You win!`;
-      feedback.style.color = 'green';
-    } else {
-      feedback.textContent = `❌ One or more answers do not start with ${letter}.`;
-      feedback.style.color = 'red';
-    }
-  };
+    logGameSession({
+      mode: 'versus',
+      emoji: '🤖',
+      startTime: time,
+      endTime: Date.now()
+    });
+  });
 
-  document.querySelector('.back-btn')?.addEventListener('click', showMenu);
-  document.querySelector('main')?.classList.remove('active');
-  game.classList.add('active');
+  bind(document.getElementById('backToMenu'), 'click', () => {
+    clearAllBindings();
+    showMenu();
+  });
 }
 
