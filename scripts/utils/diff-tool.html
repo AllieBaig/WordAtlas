@@ -1,0 +1,146 @@
+
+
+<!-- File: scripts/utils/diff-tool.html -->
+<!-- License: MIT — https://github.com/AllieBaig/WordAtlas/blob/main/LICENSE -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>🔍 GitHub Script Diff Tool</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body { font-family: monospace; padding: 1rem; background: #fafafa; }
+    label { display: block; margin-top: 1rem; }
+    input { width: 100%; padding: 0.5rem; font-family: monospace; }
+    button { margin-top: 1rem; padding: 0.5rem 1rem; }
+    pre { background: #111; color: #eee; padding: 1rem; border-radius: 6px; overflow-x: auto; white-space: pre-wrap; }
+    .added { color: lightgreen; }
+    .removed { color: #ff6666; }
+    .history { margin-top: 2rem; }
+    .history button { margin: 0.2rem 0; display: block; width: 100%; text-align: left; font-size: 0.9rem; }
+  </style>
+</head>
+<body>
+  <h1>🔍 GitHub Script Diff Tool</h1>
+
+  <label>URL 1 (Old Script):
+    <input id="url1" placeholder="https://raw.githubusercontent.com/.../main.js">
+  </label>
+
+  <label>URL 2 (New Script):
+    <input id="url2" placeholder="https://raw.githubusercontent.com/.../main.js">
+  </label>
+
+  <button onclick="compareDiff()">Compare</button>
+  <button onclick="clearHistory()">🧹 Clear History</button>
+
+  <h2>📄 Diff Result</h2>
+  <pre id="diffOutput">Paste both URLs and click Compare.</pre>
+
+  <div class="history">
+    <h3>📚 Comparison History</h3>
+    <div id="historyList">No history yet.</div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = 'wordatlas-diff-history';
+
+    function generateDiff(a, b) {
+      const aLines = a.split('\n');
+      const bLines = b.split('\n');
+      const max = Math.max(aLines.length, bLines.length);
+      const output = [];
+
+      for (let i = 0; i < max; i++) {
+        const oldLine = aLines[i] ?? '';
+        const newLine = bLines[i] ?? '';
+        if (oldLine === newLine) {
+          output.push('  ' + oldLine);
+        } else {
+          if (oldLine) output.push('- ' + oldLine);
+          if (newLine) output.push('+ ' + newLine);
+        }
+      }
+
+      return output.map(line =>
+        line.startsWith('-') ? `<span class="removed">${line}</span>` :
+        line.startsWith('+') ? `<span class="added">${line}</span>` :
+        line
+      ).join('\n');
+    }
+
+    async function fetchText(url) {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error('Fetch failed: ' + res.statusText);
+      return await res.text();
+    }
+
+    async function compareDiff() {
+      const url1 = document.getElementById('url1').value.trim();
+      const url2 = document.getElementById('url2').value.trim();
+      const out = document.getElementById('diffOutput');
+
+      if (!url1 || !url2) return out.textContent = '⚠️ Please provide both URLs.';
+
+      out.textContent = '⏳ Loading...';
+
+      try {
+        const [text1, text2] = await Promise.all([fetchText(url1), fetchText(url2)]);
+        out.innerHTML = generateDiff(text1, text2);
+        saveToHistory(url1, url2);
+        loadHistory();
+      } catch (e) {
+        out.textContent = '❌ Error: ' + e.message;
+      }
+    }
+
+    function getAutoLabel(u1, u2) {
+      const f1 = u1.split('/').pop();
+      const f2 = u2.split('/').pop();
+      const date = new Date().toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+      return `${f1} ⇄ ${f2} [${date}]`;
+    }
+
+    function saveToHistory(u1, u2) {
+      const history = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+      const label = getAutoLabel(u1, u2);
+      const entry = { u1, u2, label };
+
+      if (!history.find(h => h.u1 === u1 && h.u2 === u2)) {
+        history.unshift(entry);
+        if (history.length > 10) history.pop();
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
+      }
+    }
+
+    function loadHistory() {
+      const container = document.getElementById('historyList');
+      const history = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+      if (!history.length) {
+        container.innerHTML = '<p>No history yet.</p>';
+        return;
+      }
+
+      container.innerHTML = '';
+      history.forEach(({ u1, u2, label }) => {
+        const btn = document.createElement('button');
+        btn.textContent = label;
+        btn.onclick = () => {
+          document.getElementById('url1').value = u1;
+          document.getElementById('url2').value = u2;
+          compareDiff();
+        };
+        container.appendChild(btn);
+      });
+    }
+
+    function clearHistory() {
+      localStorage.removeItem(STORAGE_KEY);
+      loadHistory();
+    }
+
+    loadHistory();
+  </script>
+</body>
+</html>
+
