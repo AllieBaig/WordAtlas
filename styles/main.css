@@ -1,143 +1,125 @@
-/* MIT License — Copyright (c) 2025 AllieBaig */
-/* See https://github.com/AllieBaig/naptpwa/blob/main/LICENSE */
+/* File: styles/main.css */
+/* MIT License — https://github.com/AllieBaig/WordAtlas/blob/main/LICENSE */
 
-:root {
-  --bg: #fafafa;
-  --fg: #222;
-  --accent: #0055aa;
-}
-
+/* Base Layout */
 body {
+  font-family: system-ui, sans-serif;
   margin: 0;
   padding: 0;
-  background-color: var(--bg);
-  color: var(--fg);
-  font-family: system-ui, sans-serif;
-  font-size: 18px;
+  background: #f9f9f9;
+  color: #222;
   line-height: 1.6;
 }
 
-/* Responsive text */
-h1, h2 {
-  font-size: clamp(1.6rem, 3vw, 2.4rem);
-  margin: 0 0 0.5rem;
-  line-height: 1.3;
-}
-
-p, label, input, button, select, .feedback {
-  font-size: clamp(1.1rem, 2.5vw, 1.3rem);
-  line-height: 1.5;
-}
-
-/* App grid */
-#app-grid {
-  display: grid;
-  grid-template-rows: auto 1fr;
-  min-height: 100vh;
-}
-
-/* Header */
 header {
-  background-color: #333;
+  background: #0055aa;
   color: white;
-  padding: 1.5rem 1rem;
   text-align: center;
+  padding: 1rem;
 }
 
-/* Menu buttons */
-.mode-buttons {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 1rem;
-  padding: 2rem;
+h1 {
+  margin: 0.5rem 0;
+  font-size: clamp(1.4rem, 4vw, 2rem);
+}
+
+main, #game {
+  padding: 1rem;
   max-width: 800px;
   margin: auto;
+}
+
+/* Menu Visibility */
+#menu.active {
+  display: block;
+}
+#menu:not(.active) {
+  display: none;
+}
+#game {
+  display: none;
+}
+#game.active {
+  display: block;
+}
+
+/* Mode Buttons */
+.mode-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 
 .menu-btn {
-  flex: 1 1 40%;
-  max-width: 240px;
+  font-size: 1.1rem;
   padding: 1rem;
-  background: var(--accent);
+  background: #0055aa;
   color: white;
   border: none;
-  border-radius: 0.5rem;
+  border-radius: 8px;
   cursor: pointer;
-  transition: background 0.3s ease, transform 0.2s ease;
-}
-
-.menu-btn:hover {
-  background-color: #004080;
-  transform: scale(1.05);
-}
-
-/* Game container */
-.game-container {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  padding: 2rem;
-  max-width: 800px;
-  margin: auto;
-}
-
-/* Forms */
-form {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-input[type="text"],
-select,
-button {
-  font-size: inherit;
-  padding: 0.75rem;
-  border-radius: 0.4rem;
-  border: 1px solid #ccc;
-  box-sizing: border-box;
+  transition: background 0.3s;
   width: 100%;
 }
 
-/* Feedback messages */
-.feedback {
-  font-weight: bold;
-  margin-top: 0.5rem;
+.menu-btn:hover {
+  background: #003f80;
 }
 
-/* High contrast theme */
-body.theme-high-contrast {
-  --bg: #000;
-  --fg: #fff;
-  --accent: #ff0;
+/* Game Mode Layout */
+.mode-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
 }
 
-body.theme-high-contrast button,
-body.theme-high-contrast input,
-body.theme-high-contrast select {
-  background: #fff;
-  color: #000;
-  border: 2px solid #fff;
+.mode-header h2 {
+  margin: 0;
+  font-size: 1.4rem;
 }
 
-/* Dark/light themes */
-body.theme-dark {
-  --bg: #121212;
-  --fg: #f0f0f0;
-  --accent: #3399ff;
+.mode-header button {
+  padding: 0.4rem 0.8rem;
+  background: #ccc;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
 }
 
-body.theme-light {
-  --bg: #ffffff;
-  --fg: #111111;
+/* Footer */
+footer {
+  text-align: center;
+  padding: 1rem 0;
+  font-size: 0.85rem;
+  color: #555;
 }
 
-/* Responsive adjustments */
-@media (max-width: 600px) {
-  .menu-btn {
-    flex: 1 1 100%;
-    max-width: 100%;
+/* Responsive Columns */
+@media (min-width: 600px) {
+  .mode-buttons {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
   }
+
+  .menu-btn {
+    flex: 1 1 45%;
+    max-width: 300px;
+  }
+}
+
+/* Font Scaling Classes (used with + / - buttons) */
+body.fs-small {
+  font-size: 14px;
+}
+body.fs-medium {
+  font-size: 16px;
+}
+body.fs-large {
+  font-size: 18px;
+}
+body.fs-xlarge {
+  font-size: 20px;
 }
 
