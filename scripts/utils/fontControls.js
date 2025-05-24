@@ -1,31 +1,48 @@
+// File: scripts/utils/fontControls.js
+// Features:
+// - Provides list of supported fonts for UI
+// - Updates root <html> class and localStorage
+// - Used in settings panel for font selection
+//
+// License: MIT — https://github.com/AllieBaig/WordAtlas/blob/main/LICENSE
 
+const FONT_KEY = 'napt-font';
 
-// MIT License
-// Copyright (c) 2025 AllieBaig
-// https://github.com/AllieBaig/naptpwa/blob/main/LICENSE
+export const availableFonts = [
+  { name: 'Domine', class: 'font-domine' },
+  { name: 'Tinos', class: 'font-tinos' },
+  { name: 'Merriweather', class: 'font-merriweather' },
+  { name: 'Lora', class: 'font-lora' }
+];
 
-const FONT_SIZE_KEY = 'napt-fontSize';
+export function applyFontClass(fontClass) {
+  const root = document.documentElement;
 
-export function applyFontControls(container, key = '#game') {
-  const target = document.querySelector(key);
-  if (!target || !container) return;
+  // Remove all font-* classes
+  Array.from(root.classList)
+    .filter(cls => cls.startsWith('font-'))
+    .forEach(cls => root.classList.remove(cls));
 
-  const storedSize = parseInt(localStorage.getItem(FONT_SIZE_KEY)) || 100;
-  target.style.fontSize = `${storedSize}%`;
-
-  const smaller = container.querySelector('#fontSmaller');
-  const larger = container.querySelector('#fontLarger');
-
-  smaller?.addEventListener('click', () => adjustFont(-10, target));
-  larger?.addEventListener('click', () => adjustFont(10, target));
+  if (fontClass) {
+    root.classList.add(fontClass);
+    localStorage.setItem(FONT_KEY, fontClass.replace('font-', ''));
+  }
 }
 
-function adjustFont(delta, target) {
-  const currentSize = parseInt(target.style.fontSize) || 100;
-  let newSize = currentSize + delta;
-  newSize = Math.max(60, Math.min(newSize, 200)); // clamp 60–200%
+export function initFontSelector(selectEl) {
+  if (!selectEl) return;
 
-  target.style.fontSize = `${newSize}%`;
-  localStorage.setItem(FONT_SIZE_KEY, newSize);
+  // Populate select element
+  selectEl.innerHTML = availableFonts.map(f =>
+    `<option value="${f.class}">${f.name}</option>`
+  ).join('');
+
+  // Preselect current font
+  const saved = localStorage.getItem(FONT_KEY);
+  if (saved) selectEl.value = `font-${saved}`;
+
+  selectEl.addEventListener('change', () => {
+    applyFontClass(selectEl.value);
+  });
 }
 
