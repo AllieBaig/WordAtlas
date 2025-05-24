@@ -1,32 +1,14 @@
-
-
 // File: scripts/utils/menuVisibility.js
-// Features:
-// - Toggle visibility of the main menu and in-game screen
-// - Ensures clean state between modes
-// - Can be reused across all mode scripts
-//
-// License: MIT — https://github.com/AllieBaig/WordAtlas/blob/main/LICENSE
+// MIT License — https://github.com/AllieBaig/WordAtlas/blob/main/LICENSE
 
-/**
- * Show the main menu and hide the game view
- */
+// Show the main menu and hide the game screen
 export function showMenu() {
   document.getElementById('menu')?.classList.add('active');
-  const game = document.getElementById('game');
-  if (game) {
-    game.classList.remove('active');
-    game.innerHTML = '';
-  }
-  document.getElementById('mode-error-box')?.remove();
+  document.getElementById('game')?.classList.remove('active');
 }
 
-/**
- * Show the in-game view and hide the main menu
- */
-export function showGame() {
-  const game = document.getElementById('game');
-  if (game) game.classList.add('active');
+// Hide the menu and show the game screen
+export function hideMenu() {
   document.getElementById('menu')?.classList.remove('active');
+  document.getElementById('game')?.classList.add('active');
 }
-
