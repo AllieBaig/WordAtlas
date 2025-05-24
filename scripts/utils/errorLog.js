@@ -1,33 +1,110 @@
-import { getErrorLog, clearErrorLog } from './scripts/utils/modules.js';
-
-export function renderErrorLog(container) {
-  if (!container) {
-    console.error('No container element provided to renderErrorLog');
-    return;
-  }
-
-  const errors = getErrorLog();
-
-  container.innerHTML = `
-    <h2>Error Log (${errors.length} entries)</h2>
-    <button id="clearErrorLogBtn">Clear Log</button>
-    <div class="error-list" style="max-height:400px; overflow:auto; font-family: monospace; background:#111; color:#eee; padding:1em; border-radius:0.5em;">
-      ${errors.map(e => `
-        <div style="margin-bottom:1em; border-bottom:1px solid #444; padding-bottom:0.5em;">
-          <strong>${(e.type || 'ERROR').toUpperCase()}:</strong> ${e.message} <br/>
-          <small>${e.filename || e.source || ''} [${e.lineno || ''}:${e.colno || ''}]</small><br/>
-          <pre style="white-space: pre-wrap;">${e.stack || ''}</pre>
-          <em>${e.time}</em>
-        </div>
-      `).join('')}
-    </div>
-  `;
-
-  container.querySelector('#clearErrorLogBtn').addEventListener('click', () => {
-    if (confirm('Clear all stored error logs?')) {
-      clearErrorLog();
-      container.innerHTML = '<p>Error log cleared.</p>';
+<!-- File: scripts/utils/error-log.html -->
+<!-- MIT License — https://github.com/AllieBaig/WordAtlas/blob/main/LICENSE -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>🪲 Error Log Viewer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body {
+      font-family: monospace;
+      background: #111;
+      color: #eee;
+      padding: 1rem;
     }
-  });
-}
+    h2 {
+      color: #0ff;
+    }
+    button {
+      margin: 0.5rem 0.5rem 1rem 0;
+      padding: 0.4rem 0.8rem;
+      font-size: 0.9rem;
+    }
+    .entry {
+      border-left: 4px solid #444;
+      padding: 0.6rem;
+      margin-bottom: 1rem;
+      background: #222;
+      border-radius: 6px;
+    }
+    .entry.moduleexport {
+      background: #330;
+      border-left-color: orange;
+    }
+    .entry.moduleload {
+      background: #301010;
+      border-left-color: crimson;
+    }
+    pre {
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .legend {
+      font-size: 0.85rem;
+      margin-bottom: 1rem;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>📋 Error Log</h2>
+
+  <div class="legend">
+    <strong>Legend:</strong><br />
+    <span style="color:orange;">ModuleExport</span> = mismatched export<br />
+    <span style="color:crimson;">ModuleLoad</span> = module load failure<br />
+    <span style="color:#aaa;">Runtime</span> = browser error<br />
+    <span style="color:violet;">PromiseRejection</span> = failed async code<br />
+  </div>
+
+  <button onclick="clearLog()">🧹 Clear Log</button>
+  <button onclick="generateSampleError()">⚡ Generate Sample Errors</button>
+
+  <div id="log"></div>
+
+  <script type="module">
+    import { getErrorLog, clearErrorLog, logError, logModuleImportFailure } from './errorHandler.js';
+
+    function renderLog() {
+      const container = document.getElementById('log');
+      const errors = getErrorLog().reverse();
+
+      if (!errors.length) {
+        container.innerHTML = '<p>No errors logged.</p>';
+        return;
+      }
+
+      container.innerHTML = errors.map(e => {
+        const typeClass = e.type?.toLowerCase() || '';
+        return `
+          <div class="entry ${typeClass}">
+            <strong>${e.type || 'ERROR'}:</strong> ${e.message}<br/>
+            <small>${e.source || ''} [${e.lineno || ''}:${e.colno || ''}]</small><br/>
+            ${e.initiator ? `<div><strong>Initiator:</strong> ${e.initiator}</div>` : ''}
+            ${e.stack ? `<pre>${e.stack}</pre>` : ''}
+            <em>${e.time}</em>
+          </div>
+        `;
+      }).join('');
+    }
+
+    window.clearLog = () => {
+      if (confirm('Clear all stored error logs?')) {
+        clearErrorLog();
+        renderLog();
+      }
+    };
+
+    window.generateSampleError = () => {
+      logError('Runtime', 'Fake runtime error from viewer', 'error-log.html', 1, 1, 'SampleStack: viewer.js');
+      logModuleImportFailure('./modes/missingModule.js', 'init');
+      Promise.reject(new Error('Simulated rejected promise'));
+    };
+
+    renderLog();
+  </script>
+
+</body>
+</html>
 
