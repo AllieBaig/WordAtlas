@@ -1,93 +1,69 @@
-<!-- MIT License – AllieBaig – https://github.com/AllieBaig/naptpwa/blob/main/LICENSE -->
+<!-- 
+File: index.html
+Purpose: WordAtlas PWA with fallback, stats, and emoji UI
+
+MIT License
+Copyright (c) 2025 AllieBaig
+Licensed under the MIT License.
+See https://github.com/AllieBaig/WordAtlas/blob/main/LICENSE for details.
+-->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#0055aa" />
-  <meta name="description" content="NAPT Word Game – Modular, Offline, Multi-mode PWA" />
-  <title>NAPT Word Game</title>
+  <title>WordAtlas</title>
+  <meta name="description" content="Explore Word Origins and Relics - WordAtlas PWA" />
 
   <link rel="manifest" href="manifest.json" />
-  <link rel="icon" href="icons/icon-192.png" type="image/png" />
+  <link rel="icon" href="icons/icon-192.png" />
   <link rel="stylesheet" href="styles/main.css" />
   <link href="https://fonts.googleapis.com/css2?family=Domine&family=Merriweather&family=Tinos&family=Lora&display=swap" rel="stylesheet" />
 
-  <!-- Theme & Font Settings -->
-  <script>
-    const root = document.documentElement;
-    const font = localStorage.getItem('napt-font');
-    const theme = localStorage.getItem('napt-theme');
-    const contrast = localStorage.getItem('napt-contrast');
-    const useEmojis = localStorage.getItem('napt-use-emojis');
-
-    if (font) root.classList.add(`font-${font}`);
-    if (theme === 'dark') root.classList.add('theme-dark');
-    if (contrast === 'true') root.classList.add('theme-high-contrast');
-    if (useEmojis === 'false') root.classList.add('no-emojis');
-  </script>
+  <style>
+    .fallback-banner {
+      background: #f44336;
+      color: white;
+      font-weight: bold;
+      text-align: center;
+      padding: 0.6rem;
+      font-size: 1rem;
+      display: none;
+    }
+    body.fallback-active .fallback-banner {
+      display: block;
+    }
+    #statsOutput {
+      font-family: monospace;
+      white-space: pre-wrap;
+      font-size: 0.9em;
+      padding: 0.5em;
+      display: none;
+    }
+  </style>
 </head>
 
 <body>
+  <div class="fallback-banner">
+    🛟 <strong>Live from Site1 Backup</strong> — Original scripts failed, fallback activated.
+  </div>
+
   <header>
-    <h1>NAPT Word Game</h1>
-    <p>Select a game mode to begin</p>
+    <h1>WordAtlas</h1>
+    <p>Explore words, origins, and relics</p>
   </header>
 
   <main id="menu" class="active">
-    <section class="mode-buttons">
-      <button class="menu-btn" data-mode="regular">🧠 Solo Mode</button>
-      <button class="menu-btn" data-mode="wordRelic">🏺 Word Relic</button>
-      <button class="menu-btn" data-mode="wordSafari">🦁 Word Safari</button>
-      <button class="menu-btn" data-mode="dice">🎲 Dice Challenge</button>
-      <button class="menu-btn" data-mode="atlas">🗺️ Word Atlas</button>
-      <button class="menu-btn" data-mode="trail">🪄 Trail of Letters</button>
-      <button class="menu-btn" data-mode="versus">🤖 Play vs Computer</button>
-      <button class="menu-btn" data-mode="nearby">📍 Play Nearby</button>
-    </section>
+    <button class="menu-btn" data-mode="atlas">🗺️ Word Atlas</button>
+    <button class="menu-btn" data-mode="wordRelic">🏺 Word Relic</button>
 
-    <details id="settings-panel">
+    <details>
       <summary><strong>⚙️ Settings</strong></summary>
-      <div class="settings-group">
-        <label>Font
-          <select id="fontSelector">
-            <option value="">System Default</option>
-            <option value="domine">Domine</option>
-            <option value="merriweather">Merriweather</option>
-            <option value="lora">Lora</option>
-            <option value="tinos">Tinos</option>
-          </select>
-        </label>
-        <label>Theme
-          <select id="themeSelector">
-            <option value="system">System</option>
-            <option value="light">Light</option>
-            <option value="dark">Dark</option>
-          </select>
-        </label>
-        <label><input type="checkbox" id="highContrastToggle" /> High Contrast</label>
-        <label><input type="checkbox" id="emojiToggle" checked /> Show Emojis</label>
-        <label><input type="checkbox" id="resumeToggle" /> Resume Last Game</label>
-        <label>Difficulty
-          <select id="difficultySelector">
-            <option value="easy" selected>Easy</option>
-            <option value="medium">Medium</option>
-            <option value="hard">Hard</option>
-          </select>
-        </label>
-        <label>Nearby Radius
-          <select id="radiusSelector">
-            <option value="3">3 km</option>
-            <option value="10" selected>10 km</option>
-            <option value="25">25 km</option>
-            <option value="50">50 km</option>
-          </select>
-        </label>
-        <label>
-          <input type="checkbox" id="useSite2Toggle" />
-          Force fallback to Site2 scripts
-        </label>
-      </div>
+      <label><input type="checkbox" id="useSite1Toggle" /> Force Site1 fallback</label>
+      <button id="viewStatsBtn">📊 View Gameplay Stats</button>
+      <button id="exportStatsBtn">📁 Export Stats (JSON)</button>
+      <div id="statsOutput"></div>
     </details>
   </main>
 
@@ -97,44 +73,86 @@
     <a href="scripts/utils/error-log.html" target="_blank">🐞 View Error Log</a>
   </footer>
 
-  <!-- Smart script loader with fallback -->
   <script type="module">
-    const useSite2 = localStorage.getItem('napt-use-site2') === 'true';
+    const forceSite1 = localStorage.getItem('wordatlas-use-site1') === 'true';
     const primary = './scripts/';
     const fallback = './Site1/scripts/';
-    const files = ['main.js', 'gameNavigation.js'];
+    const modules = ['main.js', 'gameNavigation.js'];
 
-    for (const file of files) {
-      const path = useSite2 ? fallback : primary;
+    function logFallback(reason) {
+      const log = JSON.parse(localStorage.getItem('fallback-events') || '[]');
+      log.push({ type: 'fallback', message: 'Fallback to Site1', source: reason, time: new Date().toISOString() });
+      localStorage.setItem('fallback-events', JSON.stringify(log));
+    }
+
+    for (const file of modules) {
+      const base = forceSite1 ? fallback : primary;
       try {
-        await import(path + file);
-        console.log(`✅ Loaded: ${file} from ${path}`);
+        await import(base + file);
+        console.log(`✅ Loaded: ${file} from ${base}`);
       } catch (err) {
-        console.warn(`⚠️ Failed loading ${file} from ${path}. Retrying fallback...`);
-        if (!useSite2) {
+        console.warn(`⚠️ Failed: ${file} from ${base}, retrying Site1...`);
+        if (!forceSite1) {
           try {
             await import(fallback + file);
+            document.body.classList.add('fallback-active');
             console.log(`✅ Fallback loaded: ${file}`);
+            logFallback(`Auto-fallback: ${file} failed`);
           } catch {
-            console.error(`❌ Could not load ${file} from fallback either.`);
+            console.error(`❌ Both original and fallback failed for ${file}`);
           }
         }
       }
     }
-  </script>
 
-  <!-- Fallback toggle handler -->
-  <script>
-    const fallbackToggle = document.getElementById('useSite2Toggle');
-    if (fallbackToggle) {
-      fallbackToggle.checked = localStorage.getItem('napt-use-site2') === 'true';
-      fallbackToggle.addEventListener('change', e => {
-        localStorage.setItem('napt-use-site2', e.target.checked);
+    const toggle = document.getElementById('useSite1Toggle');
+    if (toggle) {
+      toggle.checked = forceSite1;
+      toggle.addEventListener('change', e => {
+        localStorage.setItem('wordatlas-use-site1', e.target.checked);
         location.reload();
       });
     }
+
+    import('./scripts/utils/statsTracker.js').then(({ getStats, getAggregatedStats }) => {
+      const statsBtn = document.getElementById('viewStatsBtn');
+      const exportBtn = document.getElementById('exportStatsBtn');
+      const output = document.getElementById('statsOutput');
+
+      statsBtn?.addEventListener('click', () => {
+        const summary = getAggregatedStats();
+        if (!Object.keys(summary).length) {
+          output.textContent = 'No gameplay data available yet.';
+          output.style.display = 'block';
+          return;
+        }
+
+        const sorted = Object.entries(summary).sort((a, b) => b[1].count - a[1].count);
+        const top = sorted[0][0];
+
+        output.innerHTML = sorted.map(([mode, stat]) => {
+          const emojis = Object.entries(stat.emojiMap).map(([e, c]) => `${e}×${c}`).join(' ');
+          const trophy = mode === top ? ' 🏆' : '';
+          return `▶️ ${mode}${trophy}\n🕒 ${stat.time}s | 🧩 ${stat.count} plays${emojis ? ' | ' + emojis : ''}`;
+        }).join('\n\n');
+
+        output.style.display = 'block';
+      });
+
+      exportBtn?.addEventListener('click', () => {
+        const stats = getStats();
+        const blob = new Blob([JSON.stringify(stats, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'wordatlas-stats.json';
+        a.click();
+        URL.revokeObjectURL(url);
+      });
+    });
   </script>
 
   <script src="scripts/serviceWorkerRegistration.js"></script>
 </body>
 </html>
+
