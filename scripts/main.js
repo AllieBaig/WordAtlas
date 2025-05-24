@@ -2,7 +2,7 @@
 // MIT License — https://github.com/AllieBaig/WordAtlas/blob/main/LICENSE
 
 import { registerGlobalErrorHandlers } from './utils/errorHandler.js';
-import { initFontControls } from './utils/fontControls.js';
+import { initFontSelector } from './utils/fontControls.js';
 import { initSettingsPanel } from './utils/settings.js';
 import { injectDebugTools } from './utils/debugTools.js';
 import { versionMap } from './utils/version.js'; // <-- CHANGE THIS LINE: Import 'versionMap'
