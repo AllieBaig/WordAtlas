@@ -1,102 +1,76 @@
 // File: scripts/utils/errorHandler.js
 // MIT License — https://github.com/AllieBaig/WordAtlas/blob/main/LICENSE
 
-const ERROR_LOG_KEY = 'wordatlas-error-log';
-const MAX_LOG_ENTRIES = 50;
+const STORAGE_KEY = 'wordatlas-error-log';
 
 /**
- * Retrieves the current error log from localStorage.
- * @returns {Array<Object>} An array of error objects.
+ * Save error to localStorage
+ * @param {string} type - Error type e.g., 'Runtime', 'ModuleExport'
+ * @param {string} message - Error message
+ * @param {string} source - File or module
+ * @param {string} lineno - Line number
+ * @param {string} colno - Column number
+ * @param {string} stack - Stack trace
+ * @param {string} initiator - Top stack trace line (if available)
+ */
+export function logError(type, message, source = '', lineno = '', colno = '', stack = '', initiator = '') {
+  const error = {
+    type,
+    message,
+    source,
+    lineno,
+    colno,
+    stack,
+    initiator,
+    time: new Date().toLocaleString()
+  };
+  const existing = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+  existing.push(error);
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(existing));
+}
+
+/**
+ * Log a module import that failed to export an expected function
+ * @param {string} file - File path
+ * @param {string} expectedExport - Export name (e.g. "init")
+ */
+export function logModuleImportFailure(file, expectedExport) {
+  const msg = `Module "${file}" does not export expected function "${expectedExport}".`;
+  const stack = new Error().stack;
+  const initiator = stack?.split('\n')[2]?.trim() || '';
+  logError('ModuleExport', msg, file, '', '', stack, initiator);
+}
+
+/**
+ * Retrieve all saved logs
+ * @returns {Array} - Array of error objects
  */
 export function getErrorLog() {
   try {
-    const log = localStorage.getItem(ERROR_LOG_KEY);
-    return log ? JSON.parse(log) : [];
-  } catch (e) {
-    console.error('Failed to parse error log from localStorage:', e);
+    return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+  } catch {
     return [];
   }
 }
 
 /**
- * Logs an error to localStorage.
- * @param {string} type - The type of error (e.g., 'ModuleLoad', 'ModuleExport', 'Runtime').
- * @param {string} message - The error message.
- * @param {string} source - The source of the error (e.g., file path, URL).
- * @param {number} [lineno] - Line number.
- * @param {number} [colno] - Column number.
- * @param {Error} [errorObj] - The actual error object, if available (for stack trace).
- */
-export function logError(type, message, source, lineno, colno, errorObj) {
-  const log = getErrorLog();
-  const newEntry = {
-    time: new Date().toLocaleString(),
-    type: type,
-    message: message,
-    source: source,
-    lineno: lineno,
-    colno: colno,
-    stack: errorObj?.stack || '' // Safely get stack trace
-  };
-
-  log.unshift(newEntry); // Add to the beginning (NEWER ERRORS FIRST)
-  if (log.length > MAX_LOG_ENTRIES) {
-    log.splice(MAX_LOG_ENTRIES); // Keep only the latest entries
-  }
-
-  try {
-    localStorage.setItem(ERROR_LOG_KEY, JSON.stringify(log));
-  } catch (e) {
-    console.error('Failed to save error log to localStorage:', e);
-  }
-}
-
-/**
- * A specialized function to log module import/export failures.
- * @param {string} modulePath - The path of the module that failed to load.
- * @param {string} [expectedExport] - The name of the export that was expected but not found.
- */
-export function logModuleImportFailure(modulePath, expectedExport = '') {
-  const message = expectedExport
-    ? `The requested module '${modulePath}' does not provide an export named '${expectedExport}'.`
-    : `Failed to load module: ${modulePath}.`;
-  logError('ModuleExport', message, modulePath); // Use 'ModuleExport' type for clarity
-}
-
-/**
- * Clears the error log from localStorage.
+ * Clear saved error logs
  */
 export function clearErrorLog() {
-  localStorage.removeItem(ERROR_LOG_KEY);
-  console.log('✅ Error log cleared.');
+  localStorage.removeItem(STORAGE_KEY);
 }
 
-/**
- * Registers global error handlers for uncaught exceptions and unhandled promise rejections.
- */
-export function registerGlobalErrorHandlers() { // <-- THIS FUNCTION IS EXPORTED
-  window.addEventListener('error', (event) => {
-    logError(
-      'Runtime',
-      event.message,
-      event.filename,
-      event.lineno,
-      event.colno,
-      event.error // Pass the actual error object
-    );
-    console.error('Global Error Handler:', event.message, event);
-  });
+// Auto-capture uncaught runtime errors
+window.addEventListener('error', (e) => {
+  const initiator = e.error?.stack?.split('\n')[1]?.trim() || '';
+  logError('Runtime', e.message, e.filename, e.lineno, e.colno, e.error?.stack || '', initiator);
+});
 
-  window.addEventListener('unhandledrejection', (event) => {
-    logError(
-      'UnhandledPromise',
-      event.reason?.message || String(event.reason),
-      event.reason?.fileName || 'Promise Rejection',
-      event.reason?.lineNumber,
-      event.reason?.columnNumber,
-      event.reason // Pass the reason as the error object
-    );
-    console.error('Global Unhandled Rejection:', event.reason, event);
-  });
-  console.log('✅ Global error handlers registered.');
-}
+// Auto-capture unhandled promise rejections
+window.addEventListener('unhandledrejection', (e) => {
+  const reason = e.reason?.message || e.reason || 'Unknown reason';
+  const stack = e.reason?.stack || '';
+  const initiator = stack?.split('\n')[1]?.trim() || '';
+  logError('PromiseRejection', reason, location.href, '', '', stack, initiator);
+});
+
