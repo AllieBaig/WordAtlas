@@ -1,76 +1,90 @@
+<!-- File: scripts/utils/error-log.html -->
+<!-- License: MIT — https://github.com/AllieBaig/WordAtlas/blob/main/LICENSE -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Client-Side Error Log</title>
-    <style>
-        body { font-family: sans-serif; margin: 20px; }
-        .error-item { border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; border-radius: 5px; background-color: #f9f9f9; }
-        .timestamp { font-size: 0.8em; color: #777; margin-bottom: 5px; }
-        .message { font-weight: bold; margin-bottom: 5px; }
-        .details { font-size: 0.9em; color: #555; margin-bottom: 3px; }
-        .stack-trace { white-space: pre-wrap; font-family: monospace; font-size: 0.85em; color: #333; background-color: #eee; padding: 8px; border-radius: 3px; }
-    </style>
+  <meta charset="UTF-8" />
+  <title>🪵 Error Log Viewer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      background: #f4f4f4;
+      padding: 1rem;
+      margin: 0;
+    }
+    h1 {
+      font-size: 1.4rem;
+      margin-bottom: 0.5rem;
+    }
+    pre {
+      background: #111;
+      color: #eee;
+      padding: 1rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      font-family: monospace;
+    }
+    .entry {
+      border-bottom: 1px solid #ccc;
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+    }
+    small {
+      font-size: 0.85rem;
+      color: #444;
+    }
+    button {
+      background: #c00;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      padding: 0.5rem 1rem;
+      margin-bottom: 1rem;
+    }
+  </style>
 </head>
 <body>
-    <h1>Client-Side Error Log</h1>
-    <div id="errorLogContainer">
+  <h1>🛠️ WordAtlas Error Log</h1>
+  <p><code id="siteOrigin"></code></p>
+  <button onclick="clearErrorLog()">🧹 Clear Log</button>
+  <div id="log">Loading error log...</div>
+
+  <script type="module">
+    import { getErrorLog, clearErrorLog as clearStored } from './errorHandler.js';
+
+    const currentRepo = location.origin + '/' + location.pathname.split('/')[2]; // e.g., WordAtlas
+    document.getElementById('siteOrigin').textContent = `Repo: ${currentRepo}`;
+
+    const container = document.getElementById('log');
+    const logs = getErrorLog();
+    const filtered = logs.filter(e => e.repo?.includes(currentRepo));
+
+    if (!filtered.length) {
+      container.innerHTML = '<p>✅ No relevant errors recorded.</p>';
+    } else {
+      container.innerHTML = filtered.map(e => `
+        <div class="entry">
+          <strong>${e.type.toUpperCase()}</strong>: ${e.message}<br>
+          <small>
+            Source: ${e.source || ''} [${e.lineno || ''}:${e.colno || ''}]<br>
+            Page: <a href="${e.page}" target="_blank">${e.page}</a><br>
+            Repo: <a href="${e.repo}" target="_blank">${e.repo}</a><br>
+            Time: ${e.time}
+          </small>
+          ${e.stack ? `<pre>${e.stack}</pre>` : ''}
         </div>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const errorLogContainer = document.getElementById('errorLogContainer');
-            const errors = JSON.parse(localStorage.getItem('clientErrors')) || [];
+      `).join('');
+    }
 
-            if (errors.length > 0) {
-                errors.forEach(function(error) {
-                    const errorDiv = document.createElement('div');
-                    errorDiv.classList.add('error-item');
-
-                    const timestamp = document.createElement('p');
-                    timestamp.classList.add('timestamp');
-                    // Format the timestamp for better readability
-                    const dateTimeParts = error.timestamp.split('T');
-                    const datePart = dateTimeParts[0];
-                    const timePart = dateTimeParts[1].substring(0, dateTimeParts[1].indexOf('.')); // Remove milliseconds and 'Z'
-                    timestamp.textContent = `${datePart} ${timePart} (UTC)`;
-                    errorDiv.appendChild(timestamp);
-
-                    const message = document.createElement('p');
-                    message.classList.add('message');
-                    message.textContent = error.message;
-                    errorDiv.appendChild(message);
-
-                    const detailsSource = document.createElement('p');
-                    detailsSource.classList.add('details');
-                    detailsSource.textContent = `Source: ${error.source}`;
-                    errorDiv.appendChild(detailsSource);
-
-                    const detailsLocation = document.createElement('p');
-                    detailsLocation.classList.add('details');
-                    detailsLocation.textContent = `Line: ${error.line}, Column: ${error.column}`;
-                    errorDiv.appendChild(detailsLocation);
-
-                    if (error.errorObject) {
-                        const stackTraceLabel = document.createElement('p');
-                        stackTraceLabel.classList.add('details');
-                        stackTraceLabel.textContent = 'Stack Trace:';
-                        errorDiv.appendChild(stackTraceLabel);
-
-                        const stackTrace = document.createElement('pre');
-                        stackTrace.classList.add('stack-trace');
-                        stackTrace.textContent = error.errorObject;
-                        errorDiv.appendChild(stackTrace);
-                    }
-
-                    errorLogContainer.appendChild(errorDiv);
-                });
-            } else {
-                const noErrorsMessage = document.createElement('p');
-                noErrorsMessage.textContent = 'No client-side errors have occurred yet.';
-                errorLogContainer.appendChild(noErrorsMessage);
-            }
-        });
-    </script>
+    window.clearErrorLog = () => {
+      if (confirm('Clear all error logs?')) {
+        clearStored();
+        container.innerHTML = '<p>🧹 Error log cleared.</p>';
+      }
+    };
+  </script>
 </body>
 </html>
+
