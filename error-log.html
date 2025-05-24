@@ -1,78 +1,99 @@
-
-
+<!-- File: scripts/utils/error-log.html -->
+<!-- MIT License — https://github.com/AllieBaig/WordAtlas/blob/main/LICENSE -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Client-Side Error Log</title>
-    <style>
-        body { font-family: sans-serif; margin: 20px; }
-        .error-item { border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; border-radius: 5px; background-color: #f9f9f9; }
-        .timestamp { font-size: 0.8em; color: #777; margin-bottom: 5px; }
-        .message { font-weight: bold; margin-bottom: 5px; }
-        .details { font-size: 0.9em; color: #555; margin-bottom: 3px; }
-        .stack-trace { white-space: pre-wrap; font-family: monospace; font-size: 0.85em; color: #333; background-color: #eee; padding: 8px; border-radius: 3px; }
-    </style>
+  <meta charset="UTF-8" />
+  <title>🪲 Error Log Viewer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body {
+      font-family: monospace;
+      background: #111;
+      color: #eee;
+      padding: 1rem;
+    }
+    h2 {
+      color: #0ff;
+    }
+    button {
+      margin: 0.5rem 0;
+      padding: 0.4rem 0.8rem;
+      font-size: 0.9rem;
+    }
+    .entry {
+      border-left: 4px solid #444;
+      padding: 0.6rem;
+      margin-bottom: 1rem;
+      background: #222;
+      border-radius: 6px;
+    }
+    .entry.moduleexport {
+      background: #330;
+      border-left-color: orange;
+    }
+    .entry.moduleload {
+      background: #301010;
+      border-left-color: crimson;
+    }
+    pre {
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .legend {
+      font-size: 0.85rem;
+      margin-bottom: 1rem;
+    }
+  </style>
 </head>
 <body>
-    <h1>Client-Side Error Log</h1>
-    <div id="errorLogContainer">
-        </div>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const errorLogContainer = document.getElementById('errorLogContainer');
-            const errors = JSON.parse(localStorage.getItem('clientErrors')) || [];
 
-            if (errors.length > 0) {
-                errors.forEach(function(error) {
-                    const errorDiv = document.createElement('div');
-                    errorDiv.classList.add('error-item');
+  <h2>📋 Error Log</h2>
+  <div class="legend">
+    <strong>Legend:</strong>
+    <span style="color:orange;">ModuleExport</span> = missing export<br />
+    <span style="color:crimson;">ModuleLoad</span> = failed to load module<br />
+    <span style="color:#aaa;">Other</span> = misc runtime errors
+  </div>
 
-                    const timestamp = document.createElement('p');
-                    timestamp.classList.add('timestamp');
-                    // Format the timestamp for better readability
-                    const dateTimeParts = error.timestamp.split('T');
-                    const datePart = dateTimeParts[0];
-                    const timePart = dateTimeParts[1].substring(0, dateTimeParts[1].indexOf('.')); // Remove milliseconds and 'Z'
-                    timestamp.textContent = `${datePart} ${timePart} (UTC)`;
-                    errorDiv.appendChild(timestamp);
+  <button onclick="clearLog()">🧹 Clear Log</button>
 
-                    const message = document.createElement('p');
-                    message.classList.add('message');
-                    message.textContent = error.message;
-                    errorDiv.appendChild(message);
+  <div id="log"></div>
 
-                    const detailsSource = document.createElement('p');
-                    detailsSource.classList.add('details');
-                    detailsSource.textContent = `Source: ${error.source}`;
-                    errorDiv.appendChild(detailsSource);
+  <script type="module">
+    import { getErrorLog, clearErrorLog } from './errorHandler.js';
 
-                    const detailsLocation = document.createElement('p');
-                    detailsLocation.classList.add('details');
-                    detailsLocation.textContent = `Line: ${error.line}, Column: ${error.column}`;
-                    errorDiv.appendChild(detailsLocation);
+    function renderLog() {
+      const container = document.getElementById('log');
+      const errors = getErrorLog().reverse();
 
-                    if (error.errorObject) {
-                        const stackTraceLabel = document.createElement('p');
-                        stackTraceLabel.classList.add('details');
-                        stackTraceLabel.textContent = 'Stack Trace:';
-                        errorDiv.appendChild(stackTraceLabel);
+      if (!errors.length) {
+        container.innerHTML = '<p>No errors logged.</p>';
+        return;
+      }
 
-                        const stackTrace = document.createElement('pre');
-                        stackTrace.classList.add('stack-trace');
-                        stackTrace.textContent = error.errorObject;
-                        errorDiv.appendChild(stackTrace);
-                    }
+      container.innerHTML = errors.map(e => {
+        const typeClass = e.type?.toLowerCase() || '';
+        return `
+          <div class="entry ${typeClass}">
+            <strong>${e.type?.toUpperCase() || 'ERROR'}:</strong> ${e.message}<br/>
+            <small>${e.source || ''} [${e.lineno || ''}:${e.colno || ''}]</small><br/>
+            ${e.stack ? `<pre>${e.stack}</pre>` : ''}
+            <em>${e.time}</em>
+          </div>
+        `;
+      }).join('');
+    }
 
-                    errorLogContainer.appendChild(errorDiv);
-                });
-            } else {
-                const noErrorsMessage = document.createElement('p');
-                noErrorsMessage.textContent = 'No client-side errors have occurred yet.';
-                errorLogContainer.appendChild(noErrorsMessage);
-            }
-        });
-    </script>
+    window.clearLog = () => {
+      if (confirm('Clear all stored error logs?')) {
+        clearErrorLog();
+        renderLog();
+      }
+    };
+
+    renderLog();
+  </script>
+
 </body>
 </html>
