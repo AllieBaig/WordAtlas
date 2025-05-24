@@ -5,7 +5,7 @@ import { registerGlobalErrorHandlers } from './utils/errorHandler.js';
 import { initFontControls } from './utils/fontControls.js';
 import { initSettingsPanel } from './utils/settings.js';
 import { injectDebugTools } from './utils/debugTools.js';
-import { appVersion } from './utils/version.js';
+import { versionMap } from './utils/version.js'; // <-- CHANGE THIS LINE: Import 'versionMap'
 
 // Initialize error logging globally
 registerGlobalErrorHandlers();
@@ -23,6 +23,6 @@ if (location.search.includes('debug')) {
 const footer = document.getElementById('verInfo');
 if (footer) {
   const mode = localStorage.getItem('wordatlas-version') || 'v-latest';
-  footer.textContent = `Mode: ${mode} | v${appVersion}`;
+  // CHANGE THIS LINE: Use 'versionMap.app' instead of 'appVersion'
+  footer.textContent = `Mode: ${mode} | v${versionMap.app}`;
 }
-
