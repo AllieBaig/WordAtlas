@@ -1,41 +1,58 @@
-// MIT License
-// Copyright (c) 2025 AllieBaig
-// Licensed under the MIT License.
-// See https://github.com/AllieBaig/naptpwa/blob/main/LICENSE for details.
+// File: scripts/utils/debugTools.js
+// Features:
+// - Toggle fallback mode
+// - Clear service worker + cache
+// - Clear localStorage + error logs
+// - Only injected if `?debug` is in URL
+//
+// License: MIT — https://github.com/AllieBaig/WordAtlas/blob/main/LICENSE
 
-export function injectResetPWA() {
-  const params = new URLSearchParams(window.location.search);
-  if (!params.has('debug')) return;
+import { clearErrorLog } from './errorHandler.js';
 
-  const link = document.createElement('a');
-  link.href = '#';
-  link.textContent = 'PWA not working? Click here to reset';
-  link.style.display = 'block';
-  link.style.textAlign = 'center';
-  link.style.margin = '1rem auto';
-  link.style.color = '#d00';
-  link.style.fontWeight = 'bold';
+export function injectDebugTools() {
+  if (!location.search.includes('debug')) return;
 
-  link.onclick = (e) => {
-    e.preventDefault();
-    resetPWA();
+  const panel = document.createElement('div');
+  panel.id = 'debugPanel';
+  panel.style = `
+    position:fixed; bottom:1rem; right:1rem;
+    background:#111; color:#fff; padding:1rem;
+    font-size:0.9rem; border-radius:0.5rem;
+    z-index:9999; max-width:300px;
+  `;
+
+  panel.innerHTML = `
+    <h3 style="margin-top:0;">🧪 Debug Tools</h3>
+    <button onclick="location.reload()">🔄 Reload</button>
+    <button onclick="resetPWA()">♻️ Reset PWA</button>
+    <button onclick="toggleFallback()">🛟 Toggle Fallback</button>
+    <button onclick="clearLogs()">🧹 Clear Logs</button>
+  `;
+
+  document.body.appendChild(panel);
+
+  window.resetPWA = async function () {
+    const keys = await caches.keys();
+    for (const key of keys) await caches.delete(key);
+    if ('serviceWorker' in navigator) {
+      const regs = await navigator.serviceWorker.getRegistrations();
+      for (const reg of regs) await reg.unregister();
+    }
+    localStorage.clear();
+    alert('✅ Cache, SW, and localStorage cleared.\nReloading...');
+    location.reload();
   };
 
-  document.body.appendChild(link);
-}
+  window.toggleFallback = function () {
+    const current = localStorage.getItem('wordatlas-use-site1') === 'true';
+    localStorage.setItem('wordatlas-use-site1', (!current).toString());
+    alert(`✅ Fallback mode is now ${!current}`);
+  };
 
-function resetPWA() {
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.getRegistrations().then((registrations) => {
-      registrations.forEach((reg) => reg.unregister());
-    });
-  }
+  window.clearLogs = function () {
+    clearErrorLog();
+    alert('🧹 Error log cleared.');
+  };
 
-  if ('caches' in window) {
-    caches.keys().then((keys) => {
-      keys.forEach((key) => caches.delete(key));
-    });
-  }
-
-  alert('PWA reset complete. Please refresh the page.');
+  console.log('🧪 Debug panel injected');
 }
