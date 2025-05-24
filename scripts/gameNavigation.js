@@ -2,7 +2,7 @@
 // Features:
 // - Binds game mode buttons on page load
 // - Loads mode using modeLoader.js
-// - Logs interaction for debug
+// - Logs interaction for debugs
 //
 // License: MIT — https://github.com/AllieBaig/WordAtlas/blob/main/LICENSE
 
