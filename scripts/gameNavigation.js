@@ -1,41 +1,43 @@
 // File: scripts/gameNavigation.js
 // Features:
-// - Binds menu buttons to dynamic game mode loading
-// - Uses modeLoader and modeMap
+// - Binds game mode buttons on page load
+// - Loads mode using modeLoader.js
+// - Logs interaction for debug
 //
 // License: MIT — https://github.com/AllieBaig/WordAtlas/blob/main/LICENSE
 
 import { modeMap } from './utils/modeMap.js';
 import { loadGameMode } from './utils/modeLoader.js';
+import { showMenu } from './utils/menuVisibility.js';
 import { showError } from './utils/errorUI.js';
 
-export function showMenu() {
-  document.getElementById('menu')?.classList.add('active');
-  const game = document.getElementById('game');
-  if (game) {
-    game.classList.remove('active');
-    game.innerHTML = '';
-  }
-  document.getElementById('mode-error-box')?.remove();
-}
-
-export async function navigateToMode(mode) {
-  if (!modeMap[mode]) {
-    showError(`Unknown mode "${mode}"`);
+export function navigateToMode(mode) {
+  const scriptFile = modeMap[mode];
+  if (!scriptFile) {
+    showError(`Unknown mode: "${mode}"`);
     return;
   }
-  await loadGameMode(modeMap[mode], showMenu);
+
+  console.log(`🟡 Attempting to load mode: ${mode}`);
+  loadGameMode(scriptFile, showMenu);
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  const container = document.getElementById('game');
-  if (container) container.classList.add('game-container');
+  const menuButtons = document.querySelectorAll('.menu-btn');
+  if (!menuButtons.length) {
+    console.warn('No .menu-btn found in DOM.');
+    return;
+  }
 
-  document.querySelectorAll('.menu-btn').forEach(btn => {
+  menuButtons.forEach(btn => {
     btn.addEventListener('click', () => {
       const mode = btn.dataset.mode;
+      if (!mode) return;
+      console.log(`🔘 Button clicked: ${mode}`);
       navigateToMode(mode);
     });
   });
+
+  console.log('✅ gameNavigation.js initialized and buttons are bound.');
 });
 
