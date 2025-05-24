@@ -1,39 +1,36 @@
+// File: scripts/utils/history.js
+// Features:
+// - Records daily gameplay answers per mode
+// - Stores history in localStorage, grouped by date and mode
+// - Used for streaks, review, and future summary screens
+//
+// License: MIT — https://github.com/AllieBaig/WordAtlas/blob/main/LICENSE
 
+const HISTORY_KEY = 'wordGameHistory';
 
-// MIT License
-// Copyright (c) 2025 AllieBaig
-// https://github.com/AllieBaig/naptpwa/blob/main/LICENSE
+export function saveAnswer({ mode, question, answer, correct }) {
+  const history = getHistory();
+  const today = new Date().toISOString().split('T')[0];
 
-export function saveHistoryEntry(entry, key = 'solo-history') {
-  const now = new Date().toLocaleDateString();
-  const item = { text: entry, date: now };
+  if (!history[today]) history[today] = {};
+  if (!history[today][mode]) history[today][mode] = [];
 
-  let history = JSON.parse(localStorage.getItem(key) || '[]');
-  history.unshift(item);
-  history = history.slice(0, 30); // limit to 30 entries
-  localStorage.setItem(key, JSON.stringify(history));
+  history[today][mode].push({ question, answer, correct, time: Date.now() });
+
+  localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
 }
 
-export function loadHistory(key = 'solo-history') {
-  return JSON.parse(localStorage.getItem(key) || '[]');
+export function getHistory() {
+  return JSON.parse(localStorage.getItem(HISTORY_KEY) || '{}');
 }
 
-export function renderHistoryList(containerId, key = 'solo-history') {
-  const list = document.getElementById(containerId);
-  if (!list) return;
+export function getTodayHistory() {
+  const today = new Date().toISOString().split('T')[0];
+  const history = getHistory();
+  return history[today] || {};
+}
 
-  const history = loadHistory(key);
-  list.innerHTML = '';
-
-  if (history.length === 0) {
-    list.innerHTML = '<li>No history yet.</li>';
-    return;
-  }
-
-  history.forEach(item => {
-    const li = document.createElement('li');
-    li.textContent = `${item.text} (${item.date})`;
-    list.appendChild(li);
-  });
+export function clearHistory() {
+  localStorage.removeItem(HISTORY_KEY);
 }
 
