@@ -1,34 +1,39 @@
+// File: scripts/utils/streak.js
+// Features:
+// - Tracks user's daily play streak across all modes
+// - Updates when a mode is played on a new date
+// - Resets if a day is missed
+// - Stores data in localStorage
+//
+// License: MIT — https://github.com/AllieBaig/WordAtlas/blob/main/LICENSE
 
+const STREAK_KEY = 'wordGameStreak';
 
-// MIT License
-// Copyright (c) 2025 AllieBaig
-// https://github.com/AllieBaig/naptpwa/blob/main/LICENSE
-
-const STREAK_KEY = 'napt-streaks';
-
-export function getStreak(mode = 'solo') {
-  const allStreaks = JSON.parse(localStorage.getItem(STREAK_KEY) || '{}');
-  const streak = allStreaks[mode] || { days: [], lastDate: '' };
-  return streak;
+export function getStreak() {
+  const data = JSON.parse(localStorage.getItem(STREAK_KEY) || '{}');
+  return {
+    count: data.count || 0,
+    lastDate: data.lastDate || null
+  };
 }
 
-export function updateStreakUI(elementId, mode = 'solo') {
-  const el = document.getElementById(elementId);
-  if (!el) return;
+export function updateStreak() {
+  const today = new Date().toISOString().split('T')[0];
+  const stored = getStreak();
 
-  const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
-  let streak = getStreak(mode);
+  if (stored.lastDate === today) return; // already updated today
 
-  if (!streak.days.includes(today)) {
-    streak.days.push(today);
-    streak.days = [...new Set(streak.days)].sort().slice(-7);
-    streak.lastDate = today;
+  const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
 
-    const allStreaks = JSON.parse(localStorage.getItem(STREAK_KEY) || '{}');
-    allStreaks[mode] = streak;
-    localStorage.setItem(STREAK_KEY, JSON.stringify(allStreaks));
-  }
+  const newCount = (stored.lastDate === yesterday) ? stored.count + 1 : 1;
 
-  el.innerHTML = `🔥 Streak: ${streak.days.length} day${streak.days.length !== 1 ? 's' : ''}`;
+  localStorage.setItem(STREAK_KEY, JSON.stringify({
+    count: newCount,
+    lastDate: today
+  }));
+}
+
+export function resetStreak() {
+  localStorage.removeItem(STREAK_KEY);
 }
 
