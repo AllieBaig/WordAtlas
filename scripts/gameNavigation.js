@@ -15,7 +15,7 @@ const modeMap = {
   trail: asciiMode ? './ascii/trail.js' : './modes/trail.js',
   versus: asciiMode ? './ascii/versus.js' : './modes/versus.js',
   nearby: asciiMode ? './ascii/nearby.js' : './modes/nearby.js'
-  nearby: asciiMode ? './ascii/mixlingo.js' : './modes/mixlingo.js'
+  mixlingo: asciiMode ? './ascii/mixlingo.js' : './modes/mixlingo.js'
 };
 
 export async function navigateToMode(mode) {
