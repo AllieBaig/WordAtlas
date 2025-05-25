@@ -4,7 +4,7 @@
 import { hideMenu } from '../utils/menuVisibility.js';
 import { getClueSet } from '../utils/clues.js';
 
-export default function init({ showMenu }) {
+export function init({ showMenu }) {
   hideMenu();
 
   const game = document.getElementById('game');
