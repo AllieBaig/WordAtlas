@@ -1,146 +1,144 @@
-<!-- File: index.html -->
-<!-- MIT License — https://github.com/AllieBaig/WordAtlas/blob/main/LICENSE -->
 
+<!-- File: Edited by Gemini index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>WordAtlas</title>
-  <link rel="manifest" href="manifest.json" />
-  <link rel="stylesheet" href="styles/main.css" />
-  <link rel="icon" href="icons/icon-192.png" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WordAtlas</title>
+    <link rel="manifest" href="manifest.json" />
+    <link rel="stylesheet" href="styles/main.css" />
+    <link rel="icon" href="icons/icon-192.png" />
 </head>
 <body>
 
-  <header>
-    <h1>WordAtlas</h1>
-    <p>Explore words, origins, and relics</p>
-  </header>
+    <header>
+        <h1>WordAtlas</h1>
+        <p>Explore words, origins, and relics</p>
+    </header>
 
-  <main id="menu" class="active">
-    <section class="mode-buttons">
-      <button class="menu-btn" data-mode="regular">🧠 Solo Mode</button>
-      <button class="menu-btn" data-mode="wordRelic">🏺 Word Relic</button>
-      <button class="menu-btn" data-mode="wordSafari">🦁 Word Safari</button>
-      <button class="menu-btn" data-mode="dice">🎲 Dice Challenge</button>
-      <button class="menu-btn" data-mode="atlas">🗺️ Word Atlas</button>
-      <button class="menu-btn" data-mode="trail">🪄 Trail of Letters</button>
-      <button class="menu-btn" data-mode="versus">🤖 Play vs Computer</button>
-      <button class="menu-btn" data-mode="nearby">📍 Play Nearby</button>
-      <button class="menu-btn" data-mode="mixlingo">🌐 MixLingo</button>
+    <main id="menu" class="active">
+        <section class="mode-buttons">
+            <button class="menu-btn" data-mode="regular">🧠 Solo Mode</button>
+            <button class="menu-btn" data-mode="wordRelic">🏺 Word Relic</button>
+            <button class="menu-btn" data-mode="wordSafari">🦁 Word Safari</button>
+            <button class="menu-btn" data-mode="dice">🎲 Dice Challenge</button>
+            <button class="menu-btn" data-mode="atlas">🗺️ Word Atlas</button>
+            <button class="menu-btn" data-mode="trail">🪄 Trail of Letters</button>
+            <button class="menu-btn" data-mode="versus">🤖 Play vs Computer</button>
+            <button class="menu-btn" data-mode="nearby">📍 Play Nearby</button>
+            <button class="menu-btn" data-mode="mixlingo">🌐 MixLingo</button>
+        </section>
+    </main>
+
+    <div id="game" class="hidden"></div>
+
+    <section id="settingsPanel" class="hidden">
+        <h3>⚙️ Settings</h3>
+        <label>Font Size: <span id="fontValue">100%</span></label><br/>
+        <input type="range" id="fontSlider" min="70" max="150" step="5" /><br/><br/>
+
+        <label><input type="checkbox" id="fontResponsive" checked /> Responsive Font</label><br/><br/>
+
+        <label>🎨 Theme:</label><br/>
+        <select id="themeSelect">
+            <option value="system">System</option>
+            <option value="light">Light</option>
+            <option value="dark">Dark</option>
+        </select><br/><br/>
+
+        <label>🎯 Game Difficulty:</label><br/>
+        <select id="difficultySelect">
+            <option value="easy">Easy</option>
+            <option value="normal">Normal</option>
+            <option value="hard">Hard</option>
+        </select>
     </section>
-  </main>
 
-  <div id="game" class="hidden"></div>
+    <div id="toolsPanel" class="hidden">
+        <h3>🛠️ Tools</h3>
+        <label>Password: <input type="password" id="toolsPwd" /></label>
+        <button id="unlockBtn">Unlock</button>
 
-  <section id="settingsPanel" class="hidden">
-    <h3>⚙️ Settings</h3>
-    <label>Font Size: <span id="fontValue">100%</span></label><br/>
-    <input type="range" id="fontSlider" min="70" max="150" step="5" /><br/><br/>
+        <div id="toolsLinks" style="margin-top:1em; display:none;">
+            <a href="scripts/utils/error-log.html" target="_blank" onclick="hideTools()">🪲 Error Log</a><br/>
+            <a href="scripts/utils/nearby-view.html" target="_blank" onclick="hideTools()">📍 Nearby View</a><br/>
+            <a href="scripts/utils/file-diff.html" target="_blank" onclick="hideTools()">📄 File Diff Viewer</a><br/>
+        </div>
 
-    <label><input type="checkbox" id="fontResponsive" checked /> Responsive Font</label><br/><br/>
-
-    <label>🎨 Theme:</label><br/>
-    <select id="themeSelect">
-      <option value="system">System</option>
-      <option value="light">Light</option>
-      <option value="dark">Dark</option>
-    </select><br/><br/>
-
-    <label>🎯 Game Difficulty:</label><br/>
-    <select id="difficultySelect">
-      <option value="easy">Easy</option>
-      <option value="normal">Normal</option>
-      <option value="hard">Hard</option>
-    </select>
-  </section>
-
-  <div id="toolsPanel" class="hidden">
-    <h3>🛠️ Tools</h3>
-    <label>Password: <input type="password" id="toolsPwd" /></label>
-    <button id="unlockBtn">Unlock</button>
-
-    <div id="toolsLinks" style="margin-top:1em; display:none;">
-      <a href="scripts/utils/error-log.html" target="_blank" onclick="hideTools()">🪲 Error Log</a><br/>
-      <a href="scripts/utils/nearby-view.html" target="_blank" onclick="hideTools()">📍 Nearby View</a><br/>
-      <a href="scripts/utils/file-diff.html" target="_blank" onclick="hideTools()">📄 File Diff Viewer</a><br/>
+        <div style="margin-top:1em; border-top:1px dashed #ccc; padding-top:1em;">
+            <label>🔐 Generate Hash:</label><br/>
+            <input type="text" id="genInput" placeholder="Enter text" />
+            <button id="genBtn">Generate</button>
+            <pre id="genOutput" style="font-size:0.8rem; word-break:break-all;"></pre>
+        </div>
     </div>
 
-    <div style="margin-top:1em; border-top:1px dashed #ccc; padding-top:1em;">
-      <label>🔐 Generate Hash:</label><br/>
-      <input type="text" id="genInput" placeholder="Enter text" />
-      <button id="genBtn">Generate</button>
-      <pre id="genOutput" style="font-size:0.8rem; word-break:break-all;"></pre>
-    </div>
-  </div>
+    <footer id="footerNav">
+        <button class="footer-btn active" data-panel="menu">🏠 Menu</button>
+        <button class="footer-btn" data-panel="settingsPanel">⚙️ Settings</button>
+        <button class="footer-btn" data-panel="toolsPanel">🛠️ Tools</button>
+    </footer>
 
-  <!-- Footer Navigation -->
-  <footer id="footerNav">
-    <button class="footer-btn active" data-panel="menu">🏠 Menu</button>
-    <button class="footer-btn" data-panel="settingsPanel">⚙️ Settings</button>
-    <button class="footer-btn" data-panel="toolsPanel">🛠️ Tools</button>
-  </footer>
+    <script type="module" src="scripts/main.js"></script>
+    <script src="scripts/serviceWorkerRegistration.js"></script>
 
-  <!-- Scripts -->
-  <script type="module" src="scripts/main.js"></script>
-  <script src="scripts/serviceWorkerRegistration.js"></script>
+    <script type="module">
+        // Import 'togglePanel' for footer navigation.
+        // NOTE: This will still cause an error if 'menuVisibility.js' doesn't export 'togglePanel'.
+        import { togglePanel } from './scripts/utils/menuVisibility.js';
 
-  <script type="module">
-    import { togglePanel } from './scripts/utils/menuVisibility.js';
+        document.querySelectorAll('.footer-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const target = btn.getAttribute('data-panel');
+                togglePanel(target);
 
-    document.querySelectorAll('.footer-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const target = btn.getAttribute('data-panel');
-        togglePanel(target);
+                document.querySelectorAll('.footer-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+            });
+        });
 
-        document.querySelectorAll('.footer-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-      });
-    });
+        async function hashText(text) {
+            const buffer = new TextEncoder().encode(text);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', buffer);
+            return [...new Uint8Array(hashBuffer)].map(b => b.toString(16).padStart(2, '0')).join('');
+        }
 
-    async function hashText(text) {
-      const buffer = new TextEncoder().encode(text);
-      const hashBuffer = await crypto.subtle.digest('SHA-256', buffer);
-      return [...new Uint8Array(hashBuffer)].map(b => b.toString(16).padStart(2, '0')).join('');
-    }
+        const toolsHash = 'bfc31f3bdca49e2a033823d84a7f4a1e0a34d160caef1321e98e9ab5809989b3';
+        const links = document.getElementById('toolsLinks');
 
-    const toolsHash = 'bfc31f3bdca49e2a033823d84a7f4a1e0a34d160caef1321e98e9ab5809989b3';
-    const links = document.getElementById('toolsLinks');
+        if (localStorage.getItem('toolsHash') === toolsHash) {
+            links.style.display = 'block';
+            document.getElementById('toolsPwd').style.display = 'none';
+            document.getElementById('unlockBtn').style.display = 'none';
+        }
 
-    if (localStorage.getItem('toolsHash') === toolsHash) {
-      links.style.display = 'block';
-      document.getElementById('toolsPwd').style.display = 'none';
-      document.getElementById('unlockBtn').style.display = 'none';
-    }
+        document.getElementById('unlockBtn')?.addEventListener('click', async () => {
+            const input = document.getElementById('toolsPwd');
+            const hash = await hashText(input.value);
+            if (hash === toolsHash) {
+                localStorage.setItem('toolsHash', hash);
+                links.style.display = 'block';
+                input.style.display = 'none';
+                document.getElementById('unlockBtn').style.display = 'none';
+            } else {
+                alert('❌ Incorrect password');
+            }
+        });
 
-    document.getElementById('unlockBtn')?.addEventListener('click', async () => {
-      const input = document.getElementById('toolsPwd');
-      const hash = await hashText(input.value);
-      if (hash === toolsHash) {
-        localStorage.setItem('toolsHash', hash);
-        links.style.display = 'block';
-        input.style.display = 'none';
-        document.getElementById('unlockBtn').style.display = 'none';
-      } else {
-        alert('❌ Incorrect password');
-      }
-    });
+        document.getElementById('genBtn')?.addEventListener('click', async () => {
+            const raw = document.getElementById('genInput').value;
+            const hashed = await hashText(raw);
+            document.getElementById('genOutput').textContent = hashed;
+        });
 
-    document.getElementById('genBtn')?.addEventListener('click', async () => {
-      const raw = document.getElementById('genInput').value;
-      const hashed = await hashText(raw);
-      document.getElementById('genOutput').textContent = hashed;
-    });
-
-    window.hideTools = function () {
-      document.getElementById('toolsPanel').classList.add('hidden');
-      document.querySelectorAll('.footer-btn').forEach(b => b.classList.remove('active'));
-      document.querySelector('[data-panel="menu"]')?.classList.add('active');
-      togglePanel('menu');
-    };
-  </script>
+        window.hideTools = function () {
+            document.getElementById('toolsPanel').classList.add('hidden');
+            document.querySelectorAll('.footer-btn').forEach(b => b.classList.remove('active'));
+            document.querySelector('[data-panel="menu"]')?.classList.add('active');
+            togglePanel('menu');
+        };
+    </script>
 
 </body>
 </html>
-
