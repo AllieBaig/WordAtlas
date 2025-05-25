@@ -18,7 +18,7 @@ const modeMap = {
   nearby: asciiMode ? './ascii/mixlingo.js' : './modes/mixlingo.js'
 };
 
-export async function navigateToMode(mode) {
+export function navigateToMode(mode) {
   const modulePath = modeMap[mode];
 
   if (!modulePath) {
