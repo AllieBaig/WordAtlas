@@ -5,7 +5,7 @@
 //
 // License: MIT — https://github.com/AllieBaig/WordAtlas/blob/main/LICENSE
 
-export default function init({ showMenu }) {
+export function init({ showMenu }) {
   const game = document.getElementById('game');
   if (!game) return;
 
