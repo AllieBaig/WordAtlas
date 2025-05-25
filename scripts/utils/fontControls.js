@@ -1,47 +1,28 @@
 // File: scripts/utils/fontControls.js
-// Features:
-// - Provides list of supported fonts for UI
-// - Updates root <html> class and localStorage
-// - Used in settings panel for font selection
-//
-// License: MIT — https://github.com/AllieBaig/WordAtlas/blob/main/LICENSE
+// MIT License — https://github.com/AllieBaig/WordAtlas/blob/main/LICENSE
 
-const FONT_KEY = 'napt-font';
-
-export const availableFonts = [
-  { name: 'Domine', class: 'font-domine' },
-  { name: 'Tinos', class: 'font-tinos' },
-  { name: 'Merriweather', class: 'font-merriweather' },
-  { name: 'Lora', class: 'font-lora' }
-];
-
-export function applyFontClass(fontClass) {
-  const root = document.documentElement;
-
-  // Remove all font-* classes
-  Array.from(root.classList)
-    .filter(cls => cls.startsWith('font-'))
-    .forEach(cls => root.classList.remove(cls));
-
-  if (fontClass) {
-    root.classList.add(fontClass);
-    localStorage.setItem(FONT_KEY, fontClass.replace('font-', ''));
-  }
+export function applyFontSettings(mode = 'global') {
+  const key = `fontSize-${mode}`;
+  const fontSize = localStorage.getItem(key) || '100';
+  document.documentElement.style.fontSize = `${fontSize}%`;
 }
 
-export function initFontSelector(selectEl) {
-  if (!selectEl) return;
-
-  // Populate select element
-  selectEl.innerHTML = availableFonts.map(f =>
-    `<option value="${f.class}">${f.name}</option>`
-  ).join('');
-
-  // Preselect current font
-  const saved = localStorage.getItem(FONT_KEY);
-  if (saved) selectEl.value = `font-${saved}`;
-
-  selectEl.addEventListener('change', () => {
-    applyFontClass(selectEl.value);
-  });
+export function setFontSize(percent, mode = 'global') {
+  const key = `fontSize-${mode}`;
+  document.documentElement.style.fontSize = `${percent}%`;
+  localStorage.setItem(key, percent);
 }
+
+export function getFontSize(mode = 'global') {
+  return parseInt(localStorage.getItem(`fontSize-${mode}`) || '100', 10);
+}
+
+export function isResponsiveFont() {
+  return localStorage.getItem('fontResponsive') !== 'false';
+}
+
+export function toggleResponsiveFont(enable) {
+  localStorage.setItem('fontResponsive', enable ? 'true' : 'false');
+  document.body.classList.toggle('fixed-font', !enable);
+}
+
