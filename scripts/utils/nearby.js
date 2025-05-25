@@ -14,7 +14,7 @@ import { loadStaticMap } from '../utils/mapUtils.js';
 import { bind, clearAllBindings } from '../utils/eventBinder.js';
 import { randomLetter } from '../utils/randomizer.js';
 
-export default async function init({ showMenu }) {
+export async function init({ showMenu }) {
   clearAllBindings();
   showGame();
 
