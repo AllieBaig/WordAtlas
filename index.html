@@ -47,6 +47,37 @@
       <button class="menu-btn" data-mode="nearby">📍 Play Nearby</button>
     </div>
 
+<!-- Settings Panel -->
+  <section id="settingsPanel" style="padding:1em; max-width:600px; margin:auto;">
+    <h3>⚙️ Settings</h3>
+
+    <label>Font Size: <span id="fontValue">100%</span></label><br/>
+    <input type="range" id="fontSlider" min="70" max="150" step="5" /><br/><br/>
+
+    <label><input type="checkbox" id="fontResponsive" checked /> Responsive Font</label><br/><br/>
+
+    <label>🎨 Theme:</label><br/>
+    <select id="themeSelect">
+      <option value="system">System</option>
+      <option value="light">Light</option>
+      <option value="dark">Dark</option>
+    </select><br/><br/>
+
+    <label>🎯 Game Difficulty:</label><br/>
+    <select id="difficultySelect">
+      <option value="easy">Easy</option>
+      <option value="normal">Normal</option>
+      <option value="hard">Hard</option>
+    </select>
+  </section>
+
+  <!-- Tools Toggle -->
+  <div id="toolsToggle" style="position:fixed; bottom:1rem; right:1rem; z-index:1000;">
+    <button id="openToolsBtn">🛠️ Tools</button>
+  </div>
+
+  <!-- Tools Panel -->
+
 <!-- Tools Panel -->
   <div id="toolsPanel" style="display:none; position:fixed; bottom:4.5rem; right:1rem; background:#222; padding:1em; border-radius:0.5em; box-shadow:0 0 10px #000; color:#fff;">
     <label>Password: <input type="password" id="toolsPwd" style="width:120px;" /></label>
