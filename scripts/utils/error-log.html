@@ -1,6 +1,3 @@
-<!-- File: scripts/utils/error-log.html -->
-<!-- MIT License — https://github.com/AllieBaig/WordAtlas/blob/main/LICENSE -->
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -58,18 +55,19 @@
   <p>View errors captured by the app.</p>
 
   <div>
-    <button onclick="renderPeriod('default')">🔁 Session</button>
-    <button onclick="renderPeriod('daily')">📆 Today</button>
-    <button onclick="renderPeriod('weekly')">📅 This Week</button>
-    <button onclick="renderPeriod('monthly')">🗓️ This Month</button>
-    <button onclick="clearAll()">🧹 Clear Logs</button>
+    <button id="sessionBtn" data-period="default">🔁 Session</button>
+    <button id="todayBtn" data-period="daily">📆 Today</button>
+    <button id="thisWeekBtn" data-period="weekly">📅 This Week</button>
+    <button id="thisMonthBtn" data-period="monthly">🗓️ This Month</button>
+    <button id="clearAllBtn">🧹 Clear Logs</button>
   </div>
 
   <div id="logContainer"></div>
 
   <script type="module">
-    import { getErrorLog, clearErrorLog } from './errorHandler.js';
+    import { getErrorLog, clearErrorLog } from './errorHandler.js'; // Assuming errorHandler.js is in the same folder
 
+    // renderPeriod is now called by event listeners attached in JS, not inline HTML
     function renderPeriod(period = 'default') {
       const container = document.getElementById('logContainer');
       const errors = getErrorLog(period);
@@ -79,16 +77,27 @@
         return;
       }
 
+      // Use data-error-json to store the stringified error object
       container.innerHTML = `<p><strong>${errors.length}</strong> error(s):</p>` + errors.map(e => `
-        <div class="error-box">
+        <div class="error-box" data-error-json='${JSON.stringify(e)}'>
           <strong>${e.type.toUpperCase()}:</strong> ${e.message}<br/>
           <small>${e.source || ''} [${e.lineno || ''}:${e.colno || ''}]</small><br/>
           <pre>${e.stack}</pre>
           ${e.hint ? `<div class="hint">${e.hint}</div>` : ''}
           <small>${e.time}</small><br/>
-          <button onclick='copyError(${JSON.stringify(e).replace(/"/g, '&quot;')})'>📋 Copy</button>
-        </div>
+          <button class="copy-error-btn">📋 Copy</button> </div>
       `).join('');
+
+      // Attach event listeners for COPY buttons AFTER content is rendered
+      container.querySelectorAll('.copy-error-btn').forEach(button => {
+        button.addEventListener('click', (event) => {
+          const errorBox = event.target.closest('.error-box'); // Find the parent error-box div
+          if (errorBox && errorBox.dataset.errorJson) {
+            const data = JSON.parse(errorBox.dataset.errorJson); // Parse the data from the data-attribute
+            copyError(data);
+          }
+        });
+      });
     }
 
     function copyError(data) {
@@ -102,12 +111,20 @@ ${data.time}
       navigator.clipboard.writeText(text).then(() => alert('Copied to clipboard!'));
     }
 
-    function clearAll() {
-      ['default', 'daily', 'weekly', 'monthly'].forEach(clearErrorLog);
+    // Attach event listeners for PERIOD and CLEAR buttons
+    document.getElementById('sessionBtn').addEventListener('click', () => renderPeriod('default'));
+    document.getElementById('todayBtn').addEventListener('click', () => renderPeriod('daily'));
+    document.getElementById('thisWeekBtn').addEventListener('click', () => renderPeriod('weekly'));
+    document.getElementById('thisMonthBtn').addEventListener('click', () => renderPeriod('monthly'));
+    document.getElementById('clearAllBtn').addEventListener('click', () => {
+      clearErrorLog('default'); // Clear individual periods as needed or all
+      clearErrorLog('daily');
+      clearErrorLog('weekly');
+      clearErrorLog('monthly');
       document.getElementById('logContainer').innerHTML = '<p><em>All logs cleared.</em></p>';
-    }
+    });
 
-    // Auto-load today's by default
+    // Auto-load daily errors by default when the page loads
     renderPeriod('daily');
   </script>
 
