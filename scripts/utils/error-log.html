@@ -1,98 +1,114 @@
 <!-- File: scripts/utils/error-log.html -->
 <!-- MIT License — https://github.com/AllieBaig/WordAtlas/blob/main/LICENSE -->
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>🪲 Error Log Viewer</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Error Log Viewer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     body {
-      font-family: monospace;
-      background: #111;
-      color: #eee;
+      font-family: system-ui, sans-serif;
+      background: #1a1a1a;
+      color: #f0f0f0;
+      margin: 0;
       padding: 1rem;
     }
-    h2 {
-      color: #0ff;
+    h1 {
+      margin-bottom: 0.2em;
     }
     button {
-      margin: 0.5rem 0;
-      padding: 0.4rem 0.8rem;
-      font-size: 0.9rem;
+      margin: 0.3em;
+      padding: 0.5em 1em;
+      background: #444;
+      color: white;
+      border: none;
+      border-radius: 0.3em;
+      cursor: pointer;
     }
-    .entry {
-      border-left: 4px solid #444;
-      padding: 0.6rem;
-      margin-bottom: 1rem;
-      background: #222;
-      border-radius: 6px;
+    button:hover {
+      background: #666;
     }
-    .entry.moduleexport {
-      background: #330;
-      border-left-color: orange;
+    .error-box {
+      background: #111;
+      border-left: 4px solid #f88;
+      margin: 1em 0;
+      padding: 1em;
+      border-radius: 0.4em;
     }
-    .entry.moduleload {
-      background: #301010;
-      border-left-color: crimson;
+    .hint {
+      color: orange;
+      font-size: 0.9em;
+      margin-top: 0.4em;
     }
     pre {
       white-space: pre-wrap;
       word-break: break-word;
+      font-size: 0.85em;
     }
-    .legend {
-      font-size: 0.85rem;
-      margin-bottom: 1rem;
+    small {
+      color: #aaa;
     }
   </style>
 </head>
 <body>
 
-  <h2>📋 Error Log</h2>
-  <div class="legend">
-    <strong>Legend:</strong>
-    <span style="color:orange;">ModuleExport</span> = missing export<br />
-    <span style="color:crimson;">ModuleLoad</span> = failed to load module<br />
-    <span style="color:#aaa;">Other</span> = misc runtime errors
+  <h1>🪲 Error Log Viewer</h1>
+  <p>View errors captured by the app.</p>
+
+  <div>
+    <button onclick="renderPeriod('default')">🔁 Session</button>
+    <button onclick="renderPeriod('daily')">📆 Today</button>
+    <button onclick="renderPeriod('weekly')">📅 This Week</button>
+    <button onclick="renderPeriod('monthly')">🗓️ This Month</button>
+    <button onclick="clearAll()">🧹 Clear Logs</button>
   </div>
 
-  <button onclick="clearLog()">🧹 Clear Log</button>
-
-  <div id="log"></div>
+  <div id="logContainer"></div>
 
   <script type="module">
     import { getErrorLog, clearErrorLog } from './errorHandler.js';
 
-    function renderLog() {
-      const container = document.getElementById('log');
-      const errors = getErrorLog().reverse();
+    function renderPeriod(period = 'default') {
+      const container = document.getElementById('logContainer');
+      const errors = getErrorLog(period);
 
       if (!errors.length) {
-        container.innerHTML = '<p>No errors logged.</p>';
+        container.innerHTML = `<p><em>No errors found for "${period}".</em></p>`;
         return;
       }
 
-      container.innerHTML = errors.map(e => {
-        const typeClass = e.type?.toLowerCase() || '';
-        return `
-          <div class="entry ${typeClass}">
-            <strong>${e.type?.toUpperCase() || 'ERROR'}:</strong> ${e.message}<br/>
-            <small>${e.source || ''} [${e.lineno || ''}:${e.colno || ''}]</small><br/>
-            ${e.stack ? `<pre>${e.stack}</pre>` : ''}
-            <em>${e.time}</em>
-          </div>
-        `;
-      }).join('');
+      container.innerHTML = `<p><strong>${errors.length}</strong> error(s):</p>` + errors.map(e => `
+        <div class="error-box">
+          <strong>${e.type.toUpperCase()}:</strong> ${e.message}<br/>
+          <small>${e.source || ''} [${e.lineno || ''}:${e.colno || ''}]</small><br/>
+          <pre>${e.stack}</pre>
+          ${e.hint ? `<div class="hint">${e.hint}</div>` : ''}
+          <small>${e.time}</small><br/>
+          <button onclick='copyError(${JSON.stringify(e).replace(/"/g, '&quot;')})'>📋 Copy</button>
+        </div>
+      `).join('');
     }
 
-    window.clearLog = () => {
-      if (confirm('Clear all stored error logs?')) {
-        clearErrorLog();
-        renderLog();
-      }
-    };
+    function copyError(data) {
+      const text = `
+${data.type.toUpperCase()} — ${data.message}
+${data.source || ''} [${data.lineno || ''}:${data.colno || ''}]
+${data.stack || ''}
+${data.hint || ''}
+${data.time}
+      `.trim();
+      navigator.clipboard.writeText(text).then(() => alert('Copied to clipboard!'));
+    }
 
-    renderLog();
+    function clearAll() {
+      ['default', 'daily', 'weekly', 'monthly'].forEach(clearErrorLog);
+      document.getElementById('logContainer').innerHTML = '<p><em>All logs cleared.</em></p>';
+    }
+
+    // Auto-load today's by default
+    renderPeriod('daily');
   </script>
 
 </body>
