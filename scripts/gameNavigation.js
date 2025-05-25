@@ -11,9 +11,9 @@ import { showErrorToast } from './utils/errorUI.js';
 import { hideMenu, showMenu } from './utils/menuVisibility.js';
 import { logError } from './utils/errorHandler.js';
 
-let isFallback = false;
 const fallbackBase = './Site1/scripts/';
 const mainBase = './scripts/';
+let isFallback = false;
 
 const modeMap = {
   regular: 'modes/regular.js',
@@ -31,16 +31,13 @@ const modeMap = {
  * Safely import a mode module with fallback support.
  */
 async function loadSafe(path) {
-  const full = mainBase + path;
-  const alt = fallbackBase + path;
-
   try {
-    return await import(full);
+    return await import(mainBase + path);
   } catch (e) {
     console.warn(`⚠️ Failed: ${path} from ${mainBase}, retrying fallback...`);
     isFallback = true;
     try {
-      return await import(alt);
+      return await import(fallbackBase + path);
     } catch (err) {
       console.error(`❌ Both failed for ${path}`, err);
       showErrorToast(`Failed to load: ${path}`);
@@ -76,7 +73,7 @@ export async function navigateToMode(mode) {
 /**
  * Bind all menu buttons on page load.
  */
-function initButtons() {
+function bindGameButtons() {
   const buttons = document.querySelectorAll('.menu-btn');
   buttons.forEach(btn => {
     btn.addEventListener('click', () => {
@@ -88,4 +85,10 @@ function initButtons() {
   });
 }
 
-document.addEventListener('DOMContentLoaded', initButtons);
+/**
+ * Called by main.js to initialize game navigation.
+ */
+export default function initNavigation() {
+  bindGameButtons();
+}
+
