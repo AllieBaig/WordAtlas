@@ -1,39 +1,23 @@
 // File: scripts/main.js
 // MIT License — https://github.com/AllieBaig/WordAtlas/blob/main/LICENSE
 
-import { registerGlobalErrorHandlers } from './utils/errorHandler.js';
-import { initFontSelector } from './utils/fontControls.js';
-import { initSettingsPanel } from './utils/settings.js';
-import { injectDebugTools } from './utils/debugTools.js';
-import { versionMap } from './utils/version.js'; // <-- CHANGE THIS LINE: Import 'versionMap'
+import { applyFontSettings } from './utils/fontControls.js';
+import { applyTheme } from './utils/settings.js';
+import { trackVisit } from './utils/version.js';
+import { showMenu } from './gameNavigation.js';
+import { updateVisibility } from './utils/menuVisibility.js';
+import { initSettings } from './utils/settings.js';
 
-// Initialize error logging globally
-registerGlobalErrorHandlers();
+document.addEventListener('DOMContentLoaded', () => {
+  try {
+    applyTheme();              // Apply light/dark/system theme
+    applyFontSettings();       // Load and apply user font preference
+    updateVisibility(true);    // Ensure game menu is shown at load
+    initSettings();            // Load saved settings
+    showMenu();                // Show main mode selection menu
+    trackVisit();              // Log version/date visit
+  } catch (err) {
+    console.error('Main init error:', err);
+  }
+});
 
-// File: scripts/main.js
-// ...
-//registerGlobalErrorHandlers();
-
-// TEMPORARY: Force an error to test the log
-// This will cause a ReferenceError because 'nonExistentVariable' is not defined
-console.log(nonExistentVariable);
-
-// Initialize user interface modules
-// ... (rest of your code)
-
-// Initialize user interface modules
-initFontControls();
-initSettingsPanel();
-
-// Inject debug panel if "?debug" is in URL
-if (location.search.includes('debug')) {
-  injectDebugTools();
-}
-
-// Show version mode visually in footer
-const footer = document.getElementById('verInfo');
-if (footer) {
-  const mode = localStorage.getItem('wordatlas-version') || 'v-latest';
-  // CHANGE THIS LINE: Use 'versionMap.app' instead of 'appVersion'
-  footer.textContent = `Mode: ${mode} | v${versionMap.app}`;
-}
