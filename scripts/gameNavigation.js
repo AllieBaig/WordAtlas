@@ -13,8 +13,10 @@ import { showMenu, hideMenu } from './utils/menuVisibility.js';
 import { logError } from './utils/errorHandler.js';
 
 let isFallback = false;
-const fallbackBase = './Site1/scripts/';
-const mainBase = './scripts/';
+//const fallbackBase = './Site1/scripts/';
+//const mainBase = './scripts/';
+const mainBase = './';
+const fallbackBase = '../Site1/';
 const MODE_KEY = 'lastMode'; // storage key for last played mode
 
 // Map mode name to script path
