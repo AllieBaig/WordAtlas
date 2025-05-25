@@ -5,7 +5,7 @@ import { hideMenu } from '../utils/menuVisibility.js';
 // Import safariPrompts directly, not getClueSet
 import { safariPrompts } from '../utils/clues.js'; // <-- Changed import
 
-export default function init({ showMenu }) {
+export function init({ showMenu }) {
   hideMenu();
 
   const game = document.getElementById('game');
