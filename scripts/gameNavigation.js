@@ -3,18 +3,17 @@
 
 /**
  * Game Navigation
- * Handles mode switching, dynamic module import with fallback,
- * and structured error logging including parse-time (SyntaxError).
+ * Handles menu button clicks, mode switching, fallback import, and UI visibility.
  */
 
 import { getSettings } from './utils/settings.js';
 import { showErrorToast } from './utils/errorUI.js';
-import { showMenu, hideMenu } from './utils/menuVisibility.js';
+import { hideMenu, showMenu } from './utils/menuVisibility.js';
 import { logError } from './utils/errorHandler.js';
 
-let isFallback = false;
 const fallbackBase = './Site1/scripts/';
 const mainBase = './scripts/';
+let isFallback = false;
 
 const modeMap = {
   regular: 'modes/regular.js',
@@ -29,37 +28,32 @@ const modeMap = {
 };
 
 /**
- * Load a module safely with fallback support (Site1/)
+ * Safely import a mode module with fallback support.
  */
 async function loadSafe(path) {
-  const fullPath = mainBase + path;
-  const fallbackPath = fallbackBase + path;
-
   try {
-    return await import(fullPath);
-  } catch (err) {
-    console.warn(`⚠️ Failed: ${path} from main scripts, retrying Site1...`);
+    return await import(mainBase + path);
+  } catch (e) {
+    console.warn(`⚠️ Failed: ${path} from ${mainBase}, retrying fallback...`);
     isFallback = true;
     try {
-      return await import(fallbackPath);
-    } catch (fallbackErr) {
-      console.error(`❌ Both primary and fallback failed for ${path}`, fallbackErr);
-      logError(fallbackErr, fallbackPath, {
-        type: fallbackErr instanceof SyntaxError ? 'ParseError' : 'LoadError'
-      });
-      showErrorToast(`🧨 Module load failed: ${path}`);
-      throw fallbackErr;
+      return await import(fallbackBase + path);
+    } catch (err) {
+      console.error(`❌ Both failed for ${path}`, err);
+      showErrorToast(`Failed to load: ${path}`);
+      logError(err, path);
+      throw err;
     }
   }
 }
 
 /**
- * Dynamically navigate to a mode
+ * Navigate to a game mode dynamically.
  */
 export async function navigateToMode(mode) {
   const file = modeMap[mode];
   if (!file) {
-    showErrorToast(`Unknown mode: "${mode}"`);
+    showErrorToast(`Unknown mode: ${mode}`);
     return;
   }
 
@@ -69,29 +63,31 @@ export async function navigateToMode(mode) {
       hideMenu();
       module.default({ showMenu });
     } else {
-      throw new Error(`Module "${mode}" loaded but has no default export.`);
+      showErrorToast(`Mode "${mode}" is invalid.`);
     }
   } catch (err) {
-    const origin = isFallback ? fallbackBase + file : mainBase + file;
-    logError(err, origin, {
-      type: err instanceof SyntaxError ? 'ParseError' : 'ModuleError'
-    });
-    showErrorToast(`⚠️ Error loading "${mode}"`);
-    console.error(`Module load error in ${origin}:`, err);
+    console.error(`Module load failed: ${mode}`, err);
   }
 }
 
 /**
- * Bind all mode buttons on page load
+ * Bind all menu buttons on page load.
  */
-function initMenuButtons() {
-  document.querySelectorAll('.menu-btn').forEach(btn => {
+function bindGameButtons() {
+  const buttons = document.querySelectorAll('.menu-btn');
+  buttons.forEach(btn => {
     btn.addEventListener('click', () => {
       const mode = btn.dataset.mode;
-      if (mode) navigateToMode(mode);
+      if (mode) {
+        navigateToMode(mode);
+      }
     });
   });
 }
 
-document.addEventListener('DOMContentLoaded', initMenuButtons);
-
+/**
+ * Called by main.js to initialize game navigation.
+ */
+export default function initNavigation() {
+  bindGameButtons();
+}
