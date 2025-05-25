@@ -1,60 +1,106 @@
 // File: scripts/gameNavigation.js
 // MIT License — https://github.com/AllieBaig/WordAtlas/blob/main/LICENSE
 
-import { hideMenu, showMenu } from './utils/menuVisibility.js';
-import { logError, logModuleImportFailure } from './utils/errorHandler.js';
+/**
+ * Game Navigation
+ * Handles mode switching, dynamic import with fallback,
+ * dual export support (init or default), error logging, and
+ * localStorage tracking of last successfully launched mode.
+ */
 
-const asciiMode = localStorage.getItem('asciiMode') === 'true';
+import { showErrorToast } from './utils/errorUI.js';
+import { showMenu, hideMenu } from './utils/menuVisibility.js';
+import { logError } from './utils/errorHandler.js';
 
+let isFallback = false;
+const fallbackBase = './Site1/scripts/';
+const mainBase = './scripts/';
+const MODE_KEY = 'lastMode'; // storage key for last played mode
+
+// Map mode name to script path
 const modeMap = {
-  regular: asciiMode ? './ascii/regular.js' : './modes/regular.js',
-  wordRelic: asciiMode ? './ascii/wordRelic.js' : './modes/wordRelic.js',
-  wordSafari: asciiMode ? './ascii/wordSafari.js' : './modes/wordSafari.js',
-  dice: asciiMode ? './ascii/dice.js' : './modes/dice.js',
-  atlas: asciiMode ? './ascii/atlas.js' : './modes/atlas.js',
-  trail: asciiMode ? './ascii/trail.js' : './modes/trail.js',
-  versus: asciiMode ? './ascii/versus.js' : './modes/versus.js',
-  nearby: asciiMode ? './ascii/nearby.js' : './modes/nearby.js',
-  mixlingo: asciiMode ? './ascii/mixlingo.js' : './modes/mixlingo.js'
+  regular: 'modes/regular.js',
+  wordRelic: 'modes/wordRelic.js',
+  wordSafari: 'modes/wordSafari.js',
+  dice: 'modes/dice.js',
+  atlas: 'modes/atlas.js',
+  trail: 'modes/trail.js',
+  versus: 'modes/versus.js',
+  nearby: 'modes/nearby.js',
+  mixlingo: 'modes/mixlingo.js'
 };
 
-export async function navigateToMode(mode) {
-  const modulePath = modeMap[mode];
-
-  if (!modulePath) {
-    logError('Navigation', `Invalid game mode: ${mode}`, location.href);
-    return alert(`Unknown mode: ${mode}`);
-  }
-
+/**
+ * Dynamically import module from main or fallback folder
+ */
+async function loadSafe(path) {
   try {
-    const mod = await import(modulePath);
-    if (typeof mod.init !== 'function') {
-      logModuleImportFailure(modulePath, 'init');
-      return alert(`⚠️ "${mode}" module loaded but has no export named "init"`);
+    return await import(mainBase + path);
+  } catch (e1) {
+    console.warn(`⚠️ Main load failed: ${path}. Trying fallback...`);
+    isFallback = true;
+    try {
+      return await import(fallbackBase + path);
+    } catch (e2) {
+      const source = fallbackBase + path;
+      logError(e2, source, {
+        type: e2 instanceof SyntaxError ? 'ParseError' : 'LoadError'
+      });
+      showErrorToast(`🧨 Could not load: ${path}`);
+      throw e2;
     }
-    mod.init({ showMenu });
-  } catch (err) {
-    logError('ModuleLoad', err.message, modulePath);
-    alert(`⚠️ Failed to load "${mode}" mode. See error log.`);
   }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  const gameContainer = document.getElementById('game');
-  const buttons = document.querySelectorAll('.menu-btn');
+/**
+ * Load and run a game mode module
+ */
+export async function navigateToMode(mode) {
+  const file = modeMap[mode];
+  if (!file) {
+    showErrorToast(`Unknown mode: "${mode}"`);
+    return;
+  }
 
-  buttons.forEach(btn => {
+  try {
+    const mod = await loadSafe(file);
+    const initFn = mod.init || mod.default;
+
+    if (typeof initFn === 'function') {
+      hideMenu();
+      localStorage.setItem(MODE_KEY, mode);
+      showErrorToast(`✅ Loaded: ${mode}${isFallback ? ' (Site1)' : ''}`);
+      initFn({ showMenu });
+    } else {
+      throw new Error(`Module "${mode}" has no default or init function.`);
+    }
+  } catch (err) {
+    const origin = (isFallback ? fallbackBase : mainBase) + file;
+    logError(err, origin, {
+      type: err instanceof SyntaxError ? 'ParseError' : 'ModuleError'
+    });
+    showErrorToast(`❌ Error loading "${mode}"`);
+    console.error(`❌ Load failed: ${origin}`, err);
+  }
+}
+
+/**
+ * Attach click handlers to all mode buttons
+ */
+function initMenuButtons() {
+  document.querySelectorAll('.menu-btn').forEach(btn => {
     btn.addEventListener('click', () => {
-      const mode = btn.getAttribute('data-mode');
-      navigateToMode(mode);
+      const mode = btn.dataset.mode;
+      if (mode) navigateToMode(mode);
     });
   });
+}
 
-  if (!gameContainer) {
-    const div = document.createElement('section');
-    div.id = 'game';
-    div.className = 'game-container';
-    document.body.appendChild(div);
-  }
-});
+/**
+ * Retrieve last loaded mode from storage
+ */
+export function getLastMode() {
+  return localStorage.getItem(MODE_KEY) || null;
+}
 
+document.addEventListener('DOMContentLoaded', initMenuButtons);
