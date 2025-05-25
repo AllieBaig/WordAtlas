@@ -12,5 +12,6 @@ export const modeMap = {
   trail: 'trail.js',
   versus: 'versus.js',
   nearby: 'nearby.js'
+  mixlingo: 'mixlingo.js'
 };
 
