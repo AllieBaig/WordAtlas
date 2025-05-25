@@ -1,41 +1,63 @@
+
 // File: scripts/main.js
-// Edited by Gemini (FINAL CONSOLIDATED FIXES)
 // MIT License — https://github.com/AllieBaig/WordAtlas/blob/main/LICENSE
 
-import { applyFontSettings } from './utils/fontControls.js';
-import { applyUserSettings, initSettingsPanel } from './utils/settings.js';
-import { trackVisit } from './utils/version.js';
-// THIS IS THE CRUCIAL LINE: showMenu and togglePanel come from menuVisibility.js
-import { showMenu, togglePanel } from './utils/menuVisibility.js'; 
+import { bindGameButtons } from './utils/eventBinder.js';
+import { initSettings } from './utils/settings.js';
+import { applyFontScaling } from './utils/fontControls.js';
+import { togglePanel, showGameOnly } from './utils/menuVisibility.js';
+import { initVersionToggle } from './utils/version.js';
+import { showErrorToast } from './utils/errorUI.js';
 
-// navigateToMode is exported by gameNavigation.js
-import { navigateToMode } from './gameNavigation.js';
+const scriptBase = './scripts/';
+const fallbackBase = './Site1/scripts/';
+let isFallback = false;
 
-
-document.addEventListener('DOMContentLoaded', () => {
+/**
+ * Attempts to dynamically import a script, with fallback to Site1
+ */
+async function loadSafe(path) {
   try {
-    // Theme from localStorage (light/dark/system)
-    applyUserSettings(); 
-
-    // Font scaling from settings
-    applyFontSettings(); 
-
-    // Initialize settings panel (e.g., version toggle).
-    const settingsPanelElement = document.getElementById('settingsPanel') || document.getElementById('settings-panel');
-    if (settingsPanelElement) {
-        initSettingsPanel(settingsPanelElement); 
-    } else {
-        console.warn("Settings panel element not found for initialization in main.js. Some settings features may not work.");
+    return await import(scriptBase + path);
+  } catch (e) {
+    console.warn(`⚠️ Failed: ${path} from ${scriptBase}, retrying Site1...`);
+    isFallback = true;
+    try {
+      return await import(fallbackBase + path);
+    } catch (err) {
+      console.error(`❌ Failed to load: ${path}`, err);
+      showErrorToast(`Failed to load ${path}`);
+      throw err;
     }
-
-    // showMenu() is now correctly imported from menuVisibility.js
-    // Removed updateVisibility(true); as it's not exported by menuVisibility.js and showMenu() serves a similar purpose.
-    showMenu(); // This should now work correctly.
-
-    // Version tracking
-    trackVisit(); 
-
-  } catch (err) {
-    console.error('💥 Error during main.js init:', err);
   }
-});
+}
+
+/**
+ * Application startup logic
+ */
+async function initApp() {
+  try {
+    const [
+      { default: initNavigation },
+      { initSettingsPanel }
+    ] = await Promise.all([
+      loadSafe('gameNavigation.js'),
+      loadSafe('utils/settings.js')
+    ]);
+
+    initNavigation();             // Load game modes + buttons
+    initSettingsPanel();         // Render user settings UI
+    bindGameButtons();           // Enable mode buttons
+    initSettings();              // Apply saved settings
+    applyFontScaling();          // Dynamic font scaling
+    initVersionToggle();         // Display fallback badge if needed
+    togglePanel('menu');         // Show main menu
+  } catch (err) {
+    console.error('❌ App failed to initialize.', err);
+    showErrorToast('App init failed.');
+  }
+}
+
+// Start app on DOM load
+document.addEventListener('DOMContentLoaded', initApp);
+
