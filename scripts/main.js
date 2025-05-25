@@ -3,7 +3,8 @@
 
 import { registerGlobalErrorHandlers } from './utils/errorHandler.js';
 import { initFontSelector } from './utils/fontControls.js';
-import { initSettingsPanel } from './utils/settings.js';
+import { applyUserSettings, initSettingsPanel } from './utils/settings.js'; // Changed 'initSettings' to 'applyUserSettings'
+//import { initSettingsPanel } from './utils/settings.js';
 import { injectDebugTools } from './utils/debugTools.js';
 import { versionMap } from './utils/version.js';
 
