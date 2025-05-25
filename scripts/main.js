@@ -1,55 +1,40 @@
 // File: scripts/main.js
 // MIT License — https://github.com/AllieBaig/WordAtlas/blob/main/LICENSE
 
-import { bindGameButtons } from './utils/eventBinder.js';
-import { initSettings } from './utils/settings.js';
-import { applyFontScaling } from './utils/fontControls.js';
-import { togglePanel } from './utils/menuVisibility.js';
-import { initVersionToggle } from './utils/version.js';
-import { showErrorToast } from './utils/errorUI.js';
+import { registerGlobalErrorHandlers } from './utils/errorHandler.js';
+import { initFontSelector } from './utils/fontControls.js';
+import { initSettingsPanel } from './utils/settings.js';
+import { injectDebugTools } from './utils/debugTools.js';
+import { versionMap } from './utils/version.js'; // <-- CHANGE THIS LINE: Import 'versionMap'
 
-const scriptBase = './scripts/';
-const fallbackBase = './Site1/scripts/';
-let isFallback = false;
+// Initialize error logging globally
+registerGlobalErrorHandlers();
 
-async function loadSafe(path) {
-  try {
-    return await import(scriptBase + path);
-  } catch (e) {
-    console.warn(`⚠️ Failed: ${path} from ${scriptBase}, retrying Site1...`);
-    isFallback = true;
-    try {
-      return await import(fallbackBase + path);
-    } catch (err) {
-      console.error(`❌ Failed to load: ${path}`, err);
-      showErrorToast(`Failed to load ${path}`);
-      throw err;
-    }
-  }
+// File: scripts/main.js
+// ...
+//registerGlobalErrorHandlers();
+
+// TEMPORARY: Force an error to test the log
+// This will cause a ReferenceError because 'nonExistentVariable' is not defined
+console.log(nonExistentVariable);
+
+// Initialize user interface modules
+// ... (rest of your code)
+
+// Initialize user interface modules
+initFontControls();
+initSettingsPanel();
+
+// Inject debug panel if "?debug" is in URL
+if (location.search.includes('debug')) {
+  injectDebugTools();
 }
 
-async function initApp() {
-  try {
-    const [
-      { default: initNavigation },
-      { initSettingsPanel }
-    ] = await Promise.all([
-      loadSafe('gameNavigation.js'),
-      loadSafe('utils/settings.js')
-    ]);
-
-    initNavigation();
-    initSettingsPanel();
-    bindGameButtons();
-    initSettings();
-    applyFontScaling();
-    initVersionToggle();
-    togglePanel('menu');
-  } catch (err) {
-    console.error('❌ App failed to initialize.', err);
-    showErrorToast('App init failed.');
-  }
+// Show version mode visually in footer
+const footer = document.getElementById('verInfo');
+if (footer) {
+  const mode = localStorage.getItem('wordatlas-version') || 'v-latest';
+  // CHANGE THIS LINE: Use 'versionMap.app' instead of 'appVersion'
+  footer.textContent = `Mode: ${mode} | v${versionMap.app}`;
 }
-
-document.addEventListener('DOMContentLoaded', initApp);
 
