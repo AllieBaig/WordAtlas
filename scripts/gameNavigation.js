@@ -1,42 +1,60 @@
-// File: scripts/main.js
-// Edited by Gemini
+// File: scripts/gameNavigation.js
+// Edited by Gemini (restoring correct export)
 // MIT License — https://github.com/AllieBaig/WordAtlas/blob/main/LICENSE
 
-import { applyFontSettings } from './utils/fontControls.js';
-import { applyUserSettings, initSettingsPanel } from './utils/settings.js';
-import { trackVisit } from './utils/version.js';
-// CHANGE THIS LINE: Import 'showMenu' from its actual source: menuVisibility.js
-import { showMenu } from './utils/menuVisibility.js'; // <--- UPDATED IMPORT
-import { updateVisibility } from './utils/menuVisibility.js'; // Already importing this for updateVisibility
+import { hideMenu, showMenu } from './utils/menuVisibility.js';
+import { logError, logModuleImportFailure } from './utils/errorHandler.js';
 
-// Note: gameNavigation.js itself exports navigateToMode, so we still need that:
-import { navigateToMode } from './gameNavigation.js';
+const asciiMode = localStorage.getItem('asciiMode') === 'true';
 
+const modeMap = {
+    regular: asciiMode ? './ascii/regular.js' : './modes/regular.js',
+    wordRelic: asciiMode ? './ascii/wordRelic.js' : './modes/wordRelic.js',
+    wordSafari: asciiMode ? './ascii/wordSafari.js' : './modes/wordSafari.js',
+    dice: asciiMode ? './ascii/dice.js' : './modes/dice.js',
+    atlas: asciiMode ? './ascii/atlas.js' : './modes/atlas.js',
+    trail: asciiMode ? './ascii/trail.js' : './modes/trail.js',
+    versus: asciiMode ? './ascii/versus.js' : './modes/versus.js',
+    nearby: asciiMode ? './ascii/nearby.js' : './modes/nearby.js',
+    mixlingo: asciiMode ? './ascii/mixlingo.js' : './modes/mixlingo.js' // Fixed duplicate 'nearby' key
+};
 
-document.addEventListener('DOMContentLoaded', () => {
-  try {
-    // Theme from localStorage (light/dark/system)
-    applyUserSettings();
+export async function navigateToMode(mode) { // <--- THIS IS THE CORRECT EXPORT ON LINE 13
+    const modulePath = modeMap[mode];
 
-    // Font scaling from settings
-    applyFontSettings();
-
-    // Initialize settings panel (e.g., version toggle).
-    const settingsPanelElement = document.getElementById('settingsPanel') || document.getElementById('settings-panel');
-    if (settingsPanelElement) {
-        initSettingsPanel(settingsPanelElement);
-    } else {
-        console.warn("Settings panel element not found for initialization in main.js. Some settings features may not work.");
+    if (!modulePath) {
+        logError('Navigation', `Invalid game mode: ${mode}`, location.href);
+        return alert(`Unknown mode: ${mode}`);
     }
 
-    // Show menu after cleanup
-    // showMenu() is now correctly imported from menuVisibility.js
-    updateVisibility(true); // Assuming this is also from menuVisibility.js
-    showMenu(); // <--- This call should now work if menuVisibility.js exports it
+    try {
+        const mod = await import(modulePath);
+        if (typeof mod.init !== 'function') {
+            logModuleImportFailure(modulePath, 'init');
+            return alert(`⚠️ "${mode}" module loaded but has no export named "init"`);
+        }
+        mod.init({ showMenu });
+    } catch (err) {
+        logError('ModuleLoad', err.message, modulePath);
+        alert(`⚠️ Failed to load "${mode}" mode. See error log.`);
+    }
+}
 
-    // Version tracking
-    trackVisit();
-  } catch (err) {
-    console.error('💥 Error during main.js init:', err);
-  }
+document.addEventListener('DOMContentLoaded', () => {
+    const gameContainer = document.getElementById('game');
+    const buttons = document.querySelectorAll('.menu-btn');
+
+    buttons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const mode = btn.getAttribute('data-mode');
+            navigateToMode(mode);
+        });
+    });
+
+    if (!gameContainer) {
+        const div = document.createElement('section');
+        div.id = 'game';
+        div.className = 'game-container';
+        document.body.appendChild(div);
+    }
 });
