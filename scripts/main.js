@@ -7,7 +7,7 @@ import { applyFontSettings } from './utils/fontControls.js';
 // and from 'initSettings' to 'initSettingsPanel'
 import { applyUserSettings, initSettingsPanel } from './utils/settings.js'; // <--- UPDATED IMPORTS
 import { trackVisit } from './utils/version.js';
-import { showMenu } from './gameNavigation.js';
+import { showMenu, togglePanel } from './utils/menuVisibility.js';
 import { updateVisibility } from './utils/menuVisibility.js';
 
 document.addEventListener('DOMContentLoaded', () => {
