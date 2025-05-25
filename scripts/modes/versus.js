@@ -19,7 +19,7 @@ const dummyAnswers = {
   Thing: ['Ring', 'Net', 'Pen', 'Umbrella']
 };
 
-export default function init({ showMenu }) {
+export function init({ showMenu }) {
   clearAllBindings();
   // Change this line:
   // showGame();
