@@ -46,6 +46,26 @@
       <button class="menu-btn" data-mode="nearby">📍 Play Nearby</button>
     </div>
 
+<!-- Tools Panel -->
+  <div id="toolsPanel" style="display:none; position:fixed; bottom:4.5rem; right:1rem; background:#222; padding:1em; border-radius:0.5em; box-shadow:0 0 10px #000; color:#fff;">
+    <label>Password: <input type="password" id="toolsPwd" style="width:120px;" /></label>
+    <button id="unlockBtn">Unlock</button>
+
+    <div id="toolsLinks" style="margin-top:1em; display:none;">
+      <a href="scripts/utils/error-log.html" target="_blank">🪲 Error Log</a><br/>
+      <a href="scripts/utils/nearby-view.html" target="_blank">📍 Nearby View</a><br/>
+      <a href="scripts/utils/file-diff.html" target="_blank">📄 File Diff Viewer</a><br/>
+    </div>
+
+    <div style="margin-top:1em; border-top:1px dashed #444; padding-top:1em;">
+      <label>🔐 Generate Hash:</label><br/>
+      <input type="text" id="genInput" placeholder="Enter password" style="width:120px;" />
+      <button id="genBtn">Generate</button>
+      <pre id="genOutput" style="font-size:0.8rem; word-break:break-all; margin-top:0.5em;"></pre>
+    </div>
+  </div>
+
+
     <details id="settings-panel" style="padding: 1rem; max-width: 800px; margin: auto;">
       <summary><strong>⚙️ Settings</strong></summary>
       <div style="margin-top: 1rem;">
