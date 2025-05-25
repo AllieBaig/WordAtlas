@@ -11,7 +11,7 @@ export const modeMap = {
   atlas: 'atlas.js',
   trail: 'trail.js',
   versus: 'versus.js',
-  nearby: 'nearby.js'
+  nearby: 'nearby.js',
   mixlingo: 'mixlingo.js'
 };
 
