@@ -55,46 +55,55 @@
   <p>View errors captured by the app.</p>
 
   <div>
-    <button id="sessionBtn" data-period="default">🔁 Session</button>
-    <button id="todayBtn" data-period="daily">📆 Today</button>
-    <button id="thisWeekBtn" data-period="weekly">📅 This Week</button>
-    <button id="thisMonthBtn" data-period="monthly">🗓️ This Month</button>
+    <button data-period="default">🔁 Session</button>
+    <button data-period="daily">📆 Today</button>
+    <button data-period="weekly">📅 This Week</button>
+    <button data-period="monthly">🗓️ This Month</button>
     <button id="clearAllBtn">🧹 Clear Logs</button>
   </div>
 
   <div id="logContainer"></div>
 
   <script type="module">
-    import { getErrorLog, clearErrorLog } from './errorHandler.js'; // Assuming errorHandler.js is in the same folder
+    import { getErrorLog, clearErrorLog } from './scripts/utils/errorHandler.js';
 
-    // renderPeriod is now called by event listeners attached in JS, not inline HTML
+    const container = document.getElementById('logContainer');
+
     function renderPeriod(period = 'default') {
-      const container = document.getElementById('logContainer');
       const errors = getErrorLog(period);
+      container.innerHTML = '';
 
       if (!errors.length) {
         container.innerHTML = `<p><em>No errors found for "${period}".</em></p>`;
         return;
       }
 
-      // Use data-error-json to store the stringified error object
-      container.innerHTML = `<p><strong>${errors.length}</strong> error(s):</p>` + errors.map(e => `
-        <div class="error-box" data-error-json='${JSON.stringify(e)}'>
+      const header = document.createElement('p');
+      header.innerHTML = `<strong>${errors.length}</strong> error(s):`;
+      container.appendChild(header);
+
+      errors.forEach(e => {
+        const div = document.createElement('div');
+        div.className = 'error-box';
+        div.dataset.errorJson = JSON.stringify(e);
+
+        div.innerHTML = `
           <strong>${e.type.toUpperCase()}:</strong> ${e.message}<br/>
           <small>${e.source || ''} [${e.lineno || ''}:${e.colno || ''}]</small><br/>
           <pre>${e.stack}</pre>
           ${e.hint ? `<div class="hint">${e.hint}</div>` : ''}
           <small>${e.time}</small><br/>
-          <button class="copy-error-btn">📋 Copy</button> </div>
-      `).join('');
+          <button class="copy-error-btn" aria-label="Copy error to clipboard">📋 Copy</button>
+        `;
+        container.appendChild(div);
+      });
 
-      // Attach event listeners for COPY buttons AFTER content is rendered
-      container.querySelectorAll('.copy-error-btn').forEach(button => {
+      document.querySelectorAll('.copy-error-btn').forEach(button => {
         button.addEventListener('click', (event) => {
-          const errorBox = event.target.closest('.error-box'); // Find the parent error-box div
-          if (errorBox && errorBox.dataset.errorJson) {
-            const data = JSON.parse(errorBox.dataset.errorJson); // Parse the data from the data-attribute
-            copyError(data);
+          const errorBox = event.target.closest('.error-box');
+          const errorData = errorBox?.dataset.errorJson;
+          if (errorData) {
+            copyError(JSON.parse(errorData));
           }
         });
       });
@@ -108,23 +117,26 @@ ${data.stack || ''}
 ${data.hint || ''}
 ${data.time}
       `.trim();
-      navigator.clipboard.writeText(text).then(() => alert('Copied to clipboard!'));
+
+      navigator.clipboard.writeText(text)
+        .then(() => alert('Copied to clipboard!'))
+        .catch(() => alert('Copy failed.'));
     }
 
-    // Attach event listeners for PERIOD and CLEAR buttons
-    document.getElementById('sessionBtn').addEventListener('click', () => renderPeriod('default'));
-    document.getElementById('todayBtn').addEventListener('click', () => renderPeriod('daily'));
-    document.getElementById('thisWeekBtn').addEventListener('click', () => renderPeriod('weekly'));
-    document.getElementById('thisMonthBtn').addEventListener('click', () => renderPeriod('monthly'));
-    document.getElementById('clearAllBtn').addEventListener('click', () => {
-      clearErrorLog('default'); // Clear individual periods as needed or all
-      clearErrorLog('daily');
-      clearErrorLog('weekly');
-      clearErrorLog('monthly');
-      document.getElementById('logContainer').innerHTML = '<p><em>All logs cleared.</em></p>';
+    // Period buttons
+    document.querySelectorAll('button[data-period]').forEach(button => {
+      button.addEventListener('click', () => {
+        renderPeriod(button.dataset.period);
+      });
     });
 
-    // Auto-load daily errors by default when the page loads
+    // Clear logs
+    document.getElementById('clearAllBtn').addEventListener('click', () => {
+      ['default', 'daily', 'weekly', 'monthly'].forEach(clearErrorLog);
+      container.innerHTML = '<p><em>All logs cleared.</em></p>';
+    });
+
+    // Auto-load daily errors
     renderPeriod('daily');
   </script>
 
