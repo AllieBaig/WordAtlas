@@ -1,75 +1,89 @@
-
-
 // File: scripts/utils/profileManager.js
-// Features:
-// - Creates persistent profile ID via device + nickname or auto words
-// - Fallback if storage clears or ID is missing
-// - Stores nickname, ID, and optional traits in localStorage
-// - Can be used to sync with global stats or QR transfer
-//
-// License: MIT — https://github.com/AllieBaig/WordAtlas/blob/main/LICENSE
-
-const STORAGE_KEY = 'wordProfile';
-const DEFAULT_PREFIX = 'user-';
-
-function generateUUID() {
-  return ([1e7]+-1e3+-4e3+-8e3+-1e11)
-    .replace(/[018]/g, c =>
-      (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
-    );
-}
-
-function generateWordPair() {
-  const animals = ['Owl', 'Tiger', 'Lion', 'Whale', 'Fox', 'Bear'];
-  const moods = ['Happy', 'Calm', 'Fierce', 'Silly', 'Quiet', 'Bright'];
-  return `${pick(moods)}${pick(animals)}`;
-}
-
-function pick(list) {
-  return list[Math.floor(Math.random() * list.length)];
-}
+// MIT License — https://github.com/AllieBaig/WordAtlas/blob/main/LICENSE
 
 /**
- * Get current profile object from storage
+ * Profile Manager
+ * Handles creating, storing, and retrieving a unique user profile
+ * without requiring login. Supports nickname, UUID, and word-pair fallback.
  */
-export function getProfile() {
-  return JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
+
+const PROFILE_KEY = 'userProfile';
+
+/**
+ * Load profile from localStorage
+ */
+export function getStoredProfile() {
+  const raw = localStorage.getItem(PROFILE_KEY);
+  return raw ? JSON.parse(raw) : null;
 }
 
 /**
- * Set new profile (object)
+ * Save profile to localStorage
  */
 export function saveProfile(profile) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(profile));
+  localStorage.setItem(PROFILE_KEY, JSON.stringify(profile));
 }
 
 /**
- * Ensure a profile exists — generate one if needed
+ * Get or create a user profile
+ * Priority:
+ * 1. Stored profile
+ * 2. Prompt for nickname
+ * 3. Word-pair fallback
  */
-export function ensureProfile() {
-  let profile = getProfile();
+export function getOrCreateProfile() {
+  const existing = getStoredProfile();
+  if (existing) return existing;
 
-  if (profile?.id) return profile;
+  const nickname = prompt('Enter a fun nickname (e.g. SunnyJane):');
+  let id = '';
 
-  const id = generateUUID();
-  const nickname = generateWordPair();
-  profile = { id, nickname, created: Date.now() };
+  if (nickname && nickname.trim().length >= 3) {
+    id = nickname.trim() + '-' + shortDeviceHash();
+  } else {
+    const autoNick = generateWordPair();
+    id = autoNick + '-' + shortDeviceHash();
+  }
 
-  saveProfile(profile);
-  return profile;
+  const newProfile = {
+    id,
+    nickname: nickname || generateWordPair(),
+    created: new Date().toISOString(),
+    stats: {
+      xp: 0,
+      streak: 0
+    },
+    settings: {}
+  };
+
+  saveProfile(newProfile);
+  return newProfile;
 }
 
 /**
- * Get ID only
+ * Generate a fun, memorable word pair (e.g., BrightFox)
  */
-export function getProfileID() {
-  return ensureProfile().id;
+function generateWordPair() {
+  const adjectives = ['Happy', 'Bold', 'Clever', 'Sunny', 'Brave', 'Swift', 'Bright'];
+  const animals = ['Fox', 'Owl', 'Tiger', 'Lion', 'Penguin', 'Otter', 'Falcon'];
+
+  const a = adjectives[Math.floor(Math.random() * adjectives.length)];
+  const b = animals[Math.floor(Math.random() * animals.length)];
+
+  return a + b;
 }
 
 /**
- * Get display nickname
+ * Generate a basic device fingerprint hash (short form)
+ * Uses userAgent, screen size, and timezone
  */
-export function getNickname() {
-  return ensureProfile().nickname;
+function shortDeviceHash() {
+  const base = navigator.userAgent + screen.width + screen.height + Intl.DateTimeFormat().resolvedOptions().timeZone;
+  let hash = 0;
+  for (let i = 0; i < base.length; i++) {
+    hash = ((hash << 5) - hash) + base.charCodeAt(i);
+    hash |= 0;
+  }
+  return Math.abs(hash).toString(36).substring(0, 5);
 }
 
