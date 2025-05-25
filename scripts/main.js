@@ -1,11 +1,10 @@
-
 // File: scripts/main.js
 // MIT License — https://github.com/AllieBaig/WordAtlas/blob/main/LICENSE
 
 import { bindGameButtons } from './utils/eventBinder.js';
 import { initSettings } from './utils/settings.js';
 import { applyFontScaling } from './utils/fontControls.js';
-import { togglePanel, showGameOnly } from './utils/menuVisibility.js';
+import { togglePanel } from './utils/menuVisibility.js';
 import { initVersionToggle } from './utils/version.js';
 import { showErrorToast } from './utils/errorUI.js';
 
@@ -13,9 +12,6 @@ const scriptBase = './scripts/';
 const fallbackBase = './Site1/scripts/';
 let isFallback = false;
 
-/**
- * Attempts to dynamically import a script, with fallback to Site1
- */
 async function loadSafe(path) {
   try {
     return await import(scriptBase + path);
@@ -32,9 +28,6 @@ async function loadSafe(path) {
   }
 }
 
-/**
- * Application startup logic
- */
 async function initApp() {
   try {
     const [
@@ -45,19 +38,18 @@ async function initApp() {
       loadSafe('utils/settings.js')
     ]);
 
-    initNavigation();             // Load game modes + buttons
-    initSettingsPanel();         // Render user settings UI
-    bindGameButtons();           // Enable mode buttons
-    initSettings();              // Apply saved settings
-    applyFontScaling();          // Dynamic font scaling
-    initVersionToggle();         // Display fallback badge if needed
-    togglePanel('menu');         // Show main menu
+    initNavigation();
+    initSettingsPanel();
+    bindGameButtons();
+    initSettings();
+    applyFontScaling();
+    initVersionToggle();
+    togglePanel('menu');
   } catch (err) {
     console.error('❌ App failed to initialize.', err);
     showErrorToast('App init failed.');
   }
 }
 
-// Start app on DOM load
 document.addEventListener('DOMContentLoaded', initApp);
 
