@@ -1,0 +1,38 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>🧠 Solo Mode Test</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="/WordAtlas/styles/main.css" />
+</head>
+<body>
+  <header>
+    <h1>Solo Mode Test</h1>
+  </header>
+
+  <main id="menu">
+    <button class="menu-btn" data-mode="regular">Start Solo Mode</button>
+  </main>
+
+  <section id="game" class="game-container"></section>
+
+  <script type="module">
+    // Simple manual loader
+    document.querySelector('.menu-btn')?.addEventListener('click', async () => {
+      const mod = await import('/WordAtlas/scripts/modes/regular.js');
+      mod.default({
+        showMenu: () => {
+          document.getElementById('menu')?.classList.add('active');
+          document.getElementById('game')?.classList.remove('active');
+        }
+      });
+
+      document.getElementById('menu')?.classList.remove('active');
+      document.getElementById('game')?.classList.add('active');
+    });
+  </script>
+</body>
+</html>
+
