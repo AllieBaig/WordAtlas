@@ -1,60 +1,91 @@
 // File: scripts/gameNavigation.js
-// Edited by Gemini (restoring correct export)
 // MIT License — https://github.com/AllieBaig/WordAtlas/blob/main/LICENSE
 
-import { hideMenu, showMenu } from './utils/menuVisibility.js';
-import { logError, logModuleImportFailure } from './utils/errorHandler.js';
+/**
+ * Game Navigation
+ * Handles menu button clicks, mode switching, fallback import, and UI visibility.
+ */
 
-const asciiMode = localStorage.getItem('asciiMode') === 'true';
+import { getSettings } from './utils/settings.js';
+import { showErrorToast } from './utils/errorUI.js';
+import { hideMenu, showMenu } from './utils/menuVisibility.js';
+import { logError } from './utils/errorHandler.js';
+
+let isFallback = false;
+const fallbackBase = './Site1/scripts/';
+const mainBase = './scripts/';
 
 const modeMap = {
-    regular: asciiMode ? './ascii/regular.js' : './modes/regular.js',
-    wordRelic: asciiMode ? './ascii/wordRelic.js' : './modes/wordRelic.js',
-    wordSafari: asciiMode ? './ascii/wordSafari.js' : './modes/wordSafari.js',
-    dice: asciiMode ? './ascii/dice.js' : './modes/dice.js',
-    atlas: asciiMode ? './ascii/atlas.js' : './modes/atlas.js',
-    trail: asciiMode ? './ascii/trail.js' : './modes/trail.js',
-    versus: asciiMode ? './ascii/versus.js' : './modes/versus.js',
-    nearby: asciiMode ? './ascii/nearby.js' : './modes/nearby.js',
-    mixlingo: asciiMode ? './ascii/mixlingo.js' : './modes/mixlingo.js' // Fixed duplicate 'nearby' key
+  regular: 'modes/regular.js',
+  wordRelic: 'modes/wordRelic.js',
+  wordSafari: 'modes/wordSafari.js',
+  dice: 'modes/dice.js',
+  atlas: 'modes/atlas.js',
+  trail: 'modes/trail.js',
+  versus: 'modes/versus.js',
+  nearby: 'modes/nearby.js',
+  mixlingo: 'modes/mixlingo.js'
 };
 
-export async function navigateToMode(mode) { // <--- THIS IS THE CORRECT EXPORT ON LINE 13
-    const modulePath = modeMap[mode];
+/**
+ * Safely import a mode module with fallback support.
+ */
+async function loadSafe(path) {
+  const full = mainBase + path;
+  const alt = fallbackBase + path;
 
-    if (!modulePath) {
-        logError('Navigation', `Invalid game mode: ${mode}`, location.href);
-        return alert(`Unknown mode: ${mode}`);
-    }
-
+  try {
+    return await import(full);
+  } catch (e) {
+    console.warn(`⚠️ Failed: ${path} from ${mainBase}, retrying fallback...`);
+    isFallback = true;
     try {
-        const mod = await import(modulePath);
-        if (typeof mod.init !== 'function') {
-            logModuleImportFailure(modulePath, 'init');
-            return alert(`⚠️ "${mode}" module loaded but has no export named "init"`);
-        }
-        mod.init({ showMenu });
+      return await import(alt);
     } catch (err) {
-        logError('ModuleLoad', err.message, modulePath);
-        alert(`⚠️ Failed to load "${mode}" mode. See error log.`);
+      console.error(`❌ Both failed for ${path}`, err);
+      showErrorToast(`Failed to load: ${path}`);
+      logError(err, path);
+      throw err;
     }
+  }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-    const gameContainer = document.getElementById('game');
-    const buttons = document.querySelectorAll('.menu-btn');
+/**
+ * Navigate to a game mode dynamically.
+ */
+export async function navigateToMode(mode) {
+  const file = modeMap[mode];
+  if (!file) {
+    showErrorToast(`Unknown mode: ${mode}`);
+    return;
+  }
 
-    buttons.forEach(btn => {
-        btn.addEventListener('click', () => {
-            const mode = btn.getAttribute('data-mode');
-            navigateToMode(mode);
-        });
-    });
-
-    if (!gameContainer) {
-        const div = document.createElement('section');
-        div.id = 'game';
-        div.className = 'game-container';
-        document.body.appendChild(div);
+  try {
+    const module = await loadSafe(file);
+    if (typeof module?.default === 'function') {
+      hideMenu();
+      module.default({ showMenu });
+    } else {
+      showErrorToast(`Mode "${mode}" is invalid.`);
     }
-});
+  } catch (err) {
+    console.error(`Module load failed: ${mode}`, err);
+  }
+}
+
+/**
+ * Bind all menu buttons on page load.
+ */
+function initButtons() {
+  const buttons = document.querySelectorAll('.menu-btn');
+  buttons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const mode = btn.dataset.mode;
+      if (mode) {
+        navigateToMode(mode);
+      }
+    });
+  });
+}
+
+document.addEventListener('DOMContentLoaded', initButtons);
