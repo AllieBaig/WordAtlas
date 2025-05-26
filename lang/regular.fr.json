@@ -1,0 +1,16 @@
+
+{
+  "title": "Mode Solo",
+  "description": "Entrez un mot pour chaque catégorie :",
+  "nameLabel": "Nom",
+  "placeLabel": "Lieu",
+  "animalLabel": "Animal",
+  "thingLabel": "Objet",
+  "submit": "Soumettre",
+  "back": "Retour au Menu",
+  "hint": "Indice",
+  "correct": "Correct !",
+  "incorrect": "Essayez encore.",
+  "score": "Votre Score",
+  "streak": "Série actuelle"
+}
