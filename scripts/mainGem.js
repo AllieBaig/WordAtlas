@@ -1,8 +1,8 @@
 
-// 25th 7:10
+// 25th 7:20
 
 // File: scripts/main.js
-// Edited by Gemini (Consolidated user's new logic with all essential initializations)
+// Edited by Gemini (Consolidated to match user's NEW settings.js and preserve other fixes)
 // MIT License — https://github.com/AllieBaig/WordAtlas/blob/main/LICENSE
 
 /**
@@ -13,49 +13,54 @@
 
 // --- Essential Core App Initializations ---
 // These functions apply saved settings, initialize UI components, and bind core events.
-import { applyUserSettings, initSettingsPanel, toggleEasyMode } from './utils/settings.js';
-import { applyFontScaling } from './utils/fontControls.js';
-import { initVersionToggle } from './utils/version.js';
-import { injectDebugTools } from './utils/debugTools.js'; // Corrected import name
-import { bindGameButtons, bindEvent } from './utils/eventBinder.js';
-import initNavigation, { getLastMode, navigateToMode } from './gameNavigation.js'; // Default import for initNavigation
+// NOTE: Imports and calls related to settings are adjusted based on your latest settings.js
+import { getSettings, injectSettingsPanel, setFont, toggleEasyMode } from './utils/settings.js'; // Updated imports from settings.js
+import { applyFontScaling } from './utils/fontControls.js'; // Assumed still needed and functional
+import { initVersionToggle } from './utils/version.js'; // Assumed still needed and functional
+import { injectDebugTools } from './utils/debugTools.js'; // Assumed still needed and functional
+import { bindGameButtons, bindEvent } from './utils/eventBinder.js'; // Assumed still needed and functional
+import initNavigation, { getLastMode, navigateToMode } from './gameNavigation.js'; // Assumed still needed and functional
 
-// No direct import for showErrorToast here if it's primarily used by other modules.
-// If main.js directly uses it, uncomment:
-// import { showErrorToast } from './utils/errorUI.js';
+// No direct import for showErrorToast here if it's primarily used by other modules (as per your structure).
 
 document.addEventListener('DOMContentLoaded', () => {
   const startTime = performance.now();
 
-  // 1. Apply saved user settings (font, theme, contrast)
-  applyUserSettings();
+  // 1. Get initial settings (from user's new settings.js)
+  const initialSettings = getSettings();
 
-  // 2. Apply font scaling based on user settings
-  applyFontScaling(); // This might need a mode argument depending on your font strategy (e.g., 'global')
+  // 2. Apply initial font setting
+  setFont(initialSettings.font); // Uses the setFont from your new settings.js
 
-  // 3. Initialize app version mode toggle (in footer)
+  // 3. Apply easy mode class to body based on initial setting
+  document.body.classList.toggle('easy-mode', initialSettings.easyMode);
+
+  // 4. Apply font scaling (from fontControls.js)
+  applyFontScaling(); // This assumes applyFontScaling from fontControls.js works alongside setFont.
+
+  // 5. Initialize app version mode toggle (in footer)
   initVersionToggle();
 
-  // 4. Initialize debug tools panel (if `?debug` is in URL)
+  // 6. Initialize debug tools panel (if `?debug` is in URL)
   // This function *creates* the panel and appends it to the body.
   injectDebugTools();
 
-  // 5. Initialize main game navigation (ensures game container exists if needed)
-  // The menu button binding is now handled by bindGameButtons.
+  // 7. Initialize main game navigation (ensures game container exists if needed)
   initNavigation();
 
-  // 6. Bind main game menu buttons
+  // 8. Bind main game menu buttons
   bindGameButtons();
 
   // --- User's Specific UI Toggle Logic (Integrated and Corrected) ---
 
-  // Easy Mode toggle
+  // Easy Mode toggle in footer
   const easyToggle = document.getElementById('easyToggle');
   if (easyToggle) {
-    const saved = localStorage.getItem('easyMode') === 'true';
-    easyToggle.checked = saved;
+    easyToggle.checked = initialSettings.easyMode; // Set initial state from settings
     bindEvent(easyToggle, 'change', (e) => {
       toggleEasyMode(e.target.checked);
+      // Re-apply easy mode class to body, as toggleEasyMode in settings.js only saves to localStorage
+      document.body.classList.toggle('easy-mode', e.target.checked);
     });
   }
 
@@ -65,13 +70,9 @@ document.addEventListener('DOMContentLoaded', () => {
   if (settingsBtn && settingsPanel) {
     bindEvent(settingsBtn, 'click', () => {
       settingsPanel.classList.toggle('hidden');
-      // Initialize settings panel controls *when it's first shown* if not already.
-      // This call needs the panel element.
-      // Check if it's already initialized to prevent duplicates.
-      if (!settingsPanel.dataset.initialized) { // Use a data attribute to track initialization
-        initSettingsPanel(settingsPanel); // Corrected function name
-        settingsPanel.dataset.initialized = 'true';
-      }
+      // Call injectSettingsPanel. This function handles setting innerHTML and binding events.
+      // Since it recreates innerHTML each time, no 'initialized' check is strictly needed for its core function.
+      injectSettingsPanel(); // No argument needed as per your latest settings.js
     });
   }
 
@@ -83,10 +84,6 @@ document.addEventListener('DOMContentLoaded', () => {
       // The debug panel is created by injectDebugTools on load (if ?debug is present).
       // Here, we just toggle its visibility.
       toolsPanel.classList.toggle('hidden');
-      // If you want toolsPanel to be injected by clicking this button regardless of ?debug,
-      // injectDebugTools would need to be modified, or you'd need a separate injectToolsPanel export.
-      // For now, assuming injectDebugTools already created it.
-      // If it's not present (e.g., no ?debug), this will just toggle nothing.
     });
   }
 
