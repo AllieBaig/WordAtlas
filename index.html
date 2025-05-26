@@ -92,6 +92,33 @@
 
   <div id="game" class="game-container"></div>
 
+
+<footer>
+    <div class="footer-panel">
+      <button id="toggleSettings">⚙️ Settings</button>
+      <button id="toggleTools">🛠️ Tools</button>
+      <label class="easy-mode-toggle">
+        <input type="checkbox" id="easyToggle" />
+        🌟 Easy Mode
+      </label>
+      <label class="lang-select">
+        🌐 Language:
+        <select id="languageSelect">
+          <option value="en">English</option>
+          <option value="es">Español</option>
+          <option value="fr">Français</option>
+          <option value="de">Deutsch</option>
+          <option value="zh">中文</option>
+        </select>
+      </label>
+    </div>
+
+    <div id="settingsPanel" class="hidden"></div>
+    <div id="toolsPanel" class="hidden"></div>
+
+    <p id="footer-version" style="text-align: center; font-size: 0.8rem; opacity: 0.6;"></p>
+  </footer>
+
   <!-- Scripts -->
   
   <!-- Main App Scripts -->
