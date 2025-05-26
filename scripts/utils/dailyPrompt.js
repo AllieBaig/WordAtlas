@@ -1,52 +1,67 @@
 
-const MIXLINGO_CACHE_KEY = 'mixlingoPrompt';
-const WORDS_URL = './lang/mixlingoWords.json';
+
+// File: scripts/utils/dailyPrompt.js
+// MIT License — https://github.com/AllieBaig/WordAtlas/blob/main/LICENSE
+
+const STORAGE_KEY = 'dailyPrompts';
 
 /**
- * Returns current hour key as YYYY-MM-DD-HH
+ * Returns today's YYYY-MM-DD string
  */
-function getHourKey() {
-  const now = new Date();
-  return now.toISOString().slice(0, 13); // '2025-05-26T15' → '2025-05-26T15'
+function getTodayKey() {
+  return new Date().toISOString().slice(0, 10);
 }
 
 /**
- * Get hourly mixlingo prompt with localStorage fallback
+ * Returns stored prompts for all modes
  */
-export async function getHourlyMixlingoPrompt() {
-  const hourKey = getHourKey();
-  const cached = JSON.parse(localStorage.getItem(MIXLINGO_CACHE_KEY) || '{}');
+function getStoredPrompts() {
+  return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+}
 
-  if (cached?.key === hourKey && cached.prompt) {
-    return cached.prompt;
+/**
+ * Saves a prompt for today + mode
+ */
+function storePrompt(mode, prompt) {
+  const all = getStoredPrompts();
+  const today = getTodayKey();
+
+  if (!all[today]) all[today] = {};
+  all[today][mode] = prompt;
+
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(all));
+}
+
+/**
+ * Retrieves today's prompt for a given mode, or generates one
+ */
+export function getDailyPrompt(mode = 'default') {
+  const all = getStoredPrompts();
+  const today = getTodayKey();
+
+  if (all[today]?.[mode]) {
+    return all[today][mode];
   }
 
-  try {
-    const res = await fetch(WORDS_URL);
-    const words = await res.json();
-    const random = words[Math.floor(Math.random() * words.length)];
+  const prompt = generatePrompt(mode);
+  storePrompt(mode, prompt);
+  return prompt;
+}
 
-    const prompt = {
-      word: random.word,
-      language: random.language,
-      meaning: random.meaning,
-      tip: random.tip
-    };
+/**
+ * Customizable prompt pool
+ */
+function generatePrompt(mode) {
+  const basePrompts = {
+    default: ['Inspire', 'Create', 'Explore', 'Discover', 'Transform'],
+    wordRelic: ['Ancient Wisdom', 'Hidden Chamber', 'Lost Scroll'],
+    wordSafari: ['Savanna', 'Jungle', 'Rainforest', 'Outback'],
+    dice: ['Quick Thinker', 'Wildcard', 'Roll Again'],
+    trail: ['Frost Forest', 'Sky Isles', 'Golden Caves'],
+    mixlingo: ['Bonjour', 'Guten Tag', 'Hola', 'Здравствуйте', '你好']
+  };
 
-    localStorage.setItem(MIXLINGO_CACHE_KEY, JSON.stringify({
-      key: hourKey,
-      prompt
-    }));
-
-    return prompt;
-  } catch (err) {
-    console.warn('MixLingo JSON load failed, using fallback.', err);
-    return cached.prompt || {
-      word: 'Hello',
-      language: 'English',
-      meaning: 'A common greeting',
-      tip: 'Use it to start a conversation.'
-    };
-  }
+  const pool = basePrompts[mode] || basePrompts.default;
+  return pool[Math.floor(Math.random() * pool.length)];
 }
 
