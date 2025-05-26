@@ -1,57 +1,73 @@
 // File: scripts/modes/versus.js
-// MIT License — https://github.com/AllieBaig/WordAtlas/blob/main/LICENSE
-// Timestamp: 2025-05-26 @ 15:37
+// ... (existing comments) ...
 
-import { hideMenu } from '../utils/menuVisibility.js';
-import { addXP } from '../utils/xpTracker.js';
+// Change this line:
+// import { showGame } from '../utils/menuVisibility.js';
+// To this:
+import { hideMenu } from '../utils/menuVisibility.js'; // <-- Import hideMenu instead
 
-function init({ showMenu }) {
-  hideMenu();
+import { randomLetter } from '../utils/randomizer.js';
+import { bind, clearAllBindings } from '../utils/eventBinder.js';
+import { logGameSession } from '../utils/statsTracker.js';
+
+const categories = ['Name', 'Place', 'Animal', 'Thing'];
+
+const dummyAnswers = {
+  Name: ['Alice', 'Bob', 'Mira', 'Zane'],
+  Place: ['Paris', 'Delhi', 'Mars', 'Zoo'],
+  Animal: ['Lion', 'Ant', 'Zebra', 'Otter'],
+  Thing: ['Ring', 'Net', 'Pen', 'Umbrella']
+};
+
+export function init({ showMenu }) {
+  clearAllBindings();
+  // Change this line:
+  // showGame();
+  // To this:
+  hideMenu(); // <-- Use hideMenu to show the game screen
 
   const game = document.getElementById('game');
-  if (!game) return;
+  const letter = randomLetter();
 
-  const promptWord = ['spark', 'memory', 'echo', 'firefly', 'pulse'][Math.floor(Math.random() * 5)];
+  const inputs = categories.map(cat => `
+    <tr>
+      <td>${cat}</td>
+      <td><input name="${cat}" placeholder="Your answer..." /></td>
+      <td class="ai-answer" data-cat="${cat}">🤖</td>
+    </tr>
+  `).join('');
 
   game.innerHTML = `
-    <section class="game-mode">
-      <h2>🤖 Versus Mode: You vs AI</h2>
-      <p>Your challenge word is: <strong>${promptWord}</strong></p>
-      <textarea id="playerInput" rows="3" placeholder="Use '${promptWord}' in a sentence..."></textarea>
-      <div class="btn-row">
-        <button id="submitBtn">Submit</button>
-        <button class="back-btn">⬅️ Back</button>
-      </div>
-      <div id="feedback" class="feedback"></div>
-    </section>
+    <h2>🤖 Play vs Computer</h2>
+    <p>Give words starting with: <strong>${letter}</strong></p>
+    <table>
+      <thead><tr><th>Category</th><th>You</th><th>Computer</th></tr></thead>
+      <tbody>${inputs}</tbody>
+    </table>
+    <button id="submitVs">Submit</button>
+    <button id="backToMenu">🔙 Back</button>
   `;
 
-  document.getElementById('submitBtn')?.addEventListener('click', () => {
-    const input = document.getElementById('playerInput').value.trim();
-    const feedback = document.getElementById('feedback');
+  bind(document.getElementById('submitVs'), 'click', () => {
+    const time = Date.now();
+    const emojiSet = ['⚔️', '🎯', '🏆', '📚']; // Note: emojiSet is defined but not used here
 
-    if (!input) {
-      feedback.textContent = '❌ Please write your sentence.';
-      return;
-    }
+    categories.forEach(cat => {
+      const aiEl = document.querySelector(`.ai-answer[data-cat="${cat}"]`);
+      const compWord = dummyAnswers[cat].find(w => w.startsWith(letter)) || '—';
+      aiEl.textContent = compWord;
+    });
 
-    if (!input.toLowerCase().includes(promptWord.toLowerCase())) {
-      feedback.textContent = `❌ Your sentence must include "${promptWord}".`;
-      return;
-    }
-
-    // Simple AI stub
-    const aiSentence = `The ${promptWord} lingered in the digital air.`;
-
-    feedback.innerHTML = `
-      <p>✅ Nice work! You earned +9 XP.</p>
-      <p><strong>AI:</strong> ${aiSentence}</p>
-    `;
-    addXP(9, 'Versus Challenge');
+    logGameSession({
+      mode: 'versus',
+      emoji: '🤖',
+      startTime: time,
+      endTime: Date.now()
+    });
   });
 
-  document.querySelector('.back-btn')?.addEventListener('click', showMenu);
+  bind(document.getElementById('backToMenu'), 'click', () => {
+    clearAllBindings();
+    showMenu();
+  });
 }
-
-export { init };
-export default init;
