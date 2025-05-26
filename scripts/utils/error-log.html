@@ -1,102 +1,123 @@
-
-
 <!-- File: scripts/utils/error-log.html -->
 <!-- MIT License — https://github.com/AllieBaig/WordAtlas/blob/main/LICENSE -->
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>🪲 Error Log Viewer</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Error Log Viewer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     body {
-      font-family: monospace;
+      font-family: system-ui, sans-serif;
+      margin: 0;
+      padding: 1rem;
       background: #111;
       color: #eee;
-      padding: 1rem;
     }
-    h2 {
-      color: #0ff;
+    h1 {
+      text-align: center;
+      color: #ffc107;
     }
-    button {
-      margin: 0.5rem 0;
-      padding: 0.4rem 0.8rem;
+    .controls {
+      text-align: center;
+      margin-bottom: 1em;
+    }
+    .controls button {
+      margin: 0.25em;
+      padding: 0.5em 1em;
       font-size: 0.9rem;
+      background: #333;
+      color: #fff;
+      border: 1px solid #666;
+      border-radius: 0.4em;
+      cursor: pointer;
     }
-    .entry {
-      border-left: 4px solid #444;
-      padding: 0.6rem;
-      margin-bottom: 1rem;
+    .log-output {
+      max-height: 60vh;
+      overflow-y: auto;
       background: #222;
-      border-radius: 6px;
+      padding: 1em;
+      border-radius: 0.5em;
     }
-    .entry.moduleexport {
-      background: #330;
-      border-left-color: orange;
-    }
-    .entry.moduleload {
-      background: #301010;
-      border-left-color: crimson;
-    }
-    pre {
+    .log-entry {
+      border-bottom: 1px solid #444;
+      margin-bottom: 1em;
+      padding-bottom: 0.5em;
       white-space: pre-wrap;
       word-break: break-word;
     }
-    .legend {
-      font-size: 0.85rem;
-      margin-bottom: 1rem;
+    .log-entry strong {
+      color: #ff6;
+    }
+    .footer {
+      text-align: center;
+      margin-top: 2em;
+      font-size: 0.8em;
+      opacity: 0.5;
     }
   </style>
 </head>
 <body>
 
-  <h2>📋 Error Log</h2>
-  <div class="legend">
-    <strong>Legend:</strong>
-    <span style="color:orange;">ModuleExport</span> = missing export<br />
-    <span style="color:crimson;">ModuleLoad</span> = failed to load module<br />
-    <span style="color:#aaa;">Other</span> = misc runtime errors
+  <h1>⚠️ Error Log Viewer</h1>
+
+  <div class="controls">
+    <button onclick="loadLog('today')">Today</button>
+    <button onclick="loadLog('week')">This Week</button>
+    <button onclick="loadLog('month')">This Month</button>
+    <button onclick="clearLog()">🧹 Clear Log</button>
+    <button onclick="generateTestErrors()">💥 Generate Test Errors</button>
   </div>
 
-  <button onclick="clearLog()">🧹 Clear Log</button>
+  <div id="log" class="log-output">Loading errors...</div>
 
-  <div id="log"></div>
+  <div class="footer" id="version"></div>
 
   <script type="module">
     import { getErrorLog, clearErrorLog } from './errorHandler.js';
+    import { getVersionLabel } from './version.js';
 
-    function renderLog() {
-      const container = document.getElementById('log');
-      const errors = getErrorLog().reverse();
-
-      if (!errors.length) {
-        container.innerHTML = '<p>No errors logged.</p>';
-        return;
-      }
-
-      container.innerHTML = errors.map(e => {
-        const typeClass = e.type?.toLowerCase() || '';
-        return `
-          <div class="entry ${typeClass}">
-            <strong>${e.type?.toUpperCase() || 'ERROR'}:</strong> ${e.message}<br/>
-            <small>${e.source || ''} [${e.lineno || ''}:${e.colno || ''}]</small><br/>
-            ${e.stack ? `<pre>${e.stack}</pre>` : ''}
-            <em>${e.time}</em>
-          </div>
-        `;
-      }).join('');
+    function format(entries) {
+      if (!entries.length) return '<p>No errors found.</p>';
+      return entries.map(e => `
+        <div class="log-entry">
+          <strong>${e.type}</strong>: ${e.message}<br/>
+          <em>${e.source} [${e.lineno}:${e.colno}]</em><br/>
+          <small>${e.time}</small><br/>
+          <pre>${e.stack}</pre>
+        </div>
+      `).join('');
     }
+
+    window.loadLog = (range) => {
+      const entries = getErrorLog(range);
+      document.getElementById('log').innerHTML = format(entries);
+    };
 
     window.clearLog = () => {
       if (confirm('Clear all stored error logs?')) {
         clearErrorLog();
-        renderLog();
+        loadLog('today');
       }
     };
 
-    renderLog();
-  </script>
+    window.generateTestErrors = () => {
+      // Simulated syntax error
+      try {
+        eval('let a = }');
+      } catch (e) {
+        console.error('Triggered Syntax Error:', e);
+      }
 
+      // Simulated runtime error
+      Promise.reject(new Error('Test unhandled rejection'));
+    };
+
+    // Init
+    loadLog('today');
+    document.getElementById('version').textContent = getVersionLabel();
+  </script>
 </body>
 </html>
 
