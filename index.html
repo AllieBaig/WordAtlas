@@ -55,8 +55,32 @@
     </select>
   </footer>
 
+
+<!-- Scripts -->
+  <script type="module" src="scripts/gameNavigation.js"></script>
+  <script src="scripts/serviceWorkerRegistration.js"></script>
+  <script type="module">
+    import { applyUserSettings } from './scripts/utils/settings.js';
+    import { injectResetPWA } from './scripts/utils/debugTools.js';
+    import { getLastMode } from './scripts/utils/autosave.js';
+    import { navigateToMode } from './scripts/gameNavigation.js';
+    import './scripts/utils/errorHandler.js';
+
+    applyUserSettings();
+    injectResetPWA();
+
+    const shouldResume = localStorage.getItem('napt-resume') === 'true';
+    const lastMode = getLastMode();
+    if (shouldResume && lastMode) {
+      navigateToMode(lastMode);
+    }
+  </script>
+  
   <!-- Scripts -->
-  <script type="module" src="scripts/main.js"></script>
-  <script src="scripts/serviceWorkerRegistration.js" defer></script>
+  <!--
+  <script type="module" src="scripts/main.js"></script> -->
+  
+  <!--
+  <script src="scripts/serviceWorkerRegistration.js" defer></script> -->
 </body>
 </html>
