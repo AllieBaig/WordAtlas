@@ -11,6 +11,21 @@
  * Also logs time taken from page load to interactive mode.
  */
 
+
+
+
+
+///////////////
+
+// GPT file
+//import { toggleEasyMode } from './utils/settings.js';
+//import { injectToolsPanel } from './utils/debugTools.js';
+//import { injectSettingsPanel } from './utils/settings.js';
+//import { bindEvent } from './utils/eventBinder.js';
+//import { getLastMode, navigateToMode } from './gameNavigation.js';
+
+
+/////////////////////////
 // --- Essential Core App Initializations ---
 // These functions apply saved settings, initialize UI components, and bind core events.
 import { applyUserSettings, initSettingsPanel, toggleEasyMode } from './utils/settings.js';
