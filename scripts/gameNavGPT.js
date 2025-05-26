@@ -1,110 +1,75 @@
-
-
-// File: scripts/gameNavigation.js
-// MIT License — https://github.com/AllieBaig/WordAtlas/blob/main/LICENSE
-
 /**
- * Game Navigation
- * Handles mode switching, dynamic import with fallback,
- * dual export support (init or default), error logging, and
- * localStorage tracking of last successfully launched mode.
+ * Handles navigation between game modes and main menu screen.
+ * Dynamically imports mode scripts with language-based resolution.
+ * Used by: main.js to resume last mode on startup.
+ * Related: errorUI.js, settings.js, regular-xx.js mode files.
+ * Handles ES module default/init fallback and shows error if loading fails.
+ * MIT License: https://github.com/AllieBaig/WordAtlas/blob/main/LICENSE
+ * Timestamp: 2025-05-27 19:05 | File: scripts/gameNavigation.js
  */
 
 import { showErrorToast } from './utils/errorUI.js';
-import { showMenu, hideMenu } from './utils/menuVisibility.js';
-import { logError } from './utils/errorHandler.js';
 
-let isFallback = false;
-//const mainBase = './scripts/';
-//const fallbackBase = './Site1/scripts/';
-const mainBase = '/scripts/';
-const fallbackBase = '/Site1/scripts/';
-const MODE_KEY = 'lastMode'; // storage key for last played mode
+const currentLang = localStorage.getItem('lang') || 'en';
 
-// Map mode name to script path
 const modeMap = {
-  regular: 'modes/regular.js',
-  wordRelic: 'modes/wordRelic.js',
-  wordSafari: 'modes/wordSafari.js',
-  dice: 'modes/dice.js',
-  atlas: 'modes/atlas.js',
-  trail: 'modes/trail.js',
-  versus: 'modes/versus.js',
-  nearby: 'modes/nearby.js',
-  mixlingo: 'modes/mixlingo.js'
+  regular: `./modes/regular${currentLang === 'en' ? '' : '-' + currentLang}.js`,
+  wordRelic: './modes/wordRelic.js',
+  wordSafari: './modes/wordSafari.js',
+  dice: './modes/dice.js',
+  atlas: './modes/atlas.js',
+  trail: './modes/trail.js',
+  versus: './modes/versus.js',
+  nearby: './modes/nearby.js',
+  mixlingo: './modes/mixlingo.js'
 };
 
-/**
- * Dynamically import module from main or fallback folder
- */
-async function loadSafe(path) {
-  try {
-    return await import(mainBase + path);
-  } catch (e1) {
-    console.warn(`⚠️ Main load failed: ${path}. Trying fallback...`);
-    isFallback = true;
-    try {
-      return await import(fallbackBase + path);
-    } catch (e2) {
-      const source = fallbackBase + path;
-      logError(e2, source, {
-        type: e2 instanceof SyntaxError ? 'ParseError' : 'LoadError'
-      });
-      showErrorToast(`🧨 Could not load: ${path}`);
-      throw e2;
-    }
+export function showMenu() {
+  const menu = document.getElementById('menu');
+  const game = document.getElementById('game');
+  if (menu) menu.classList.add('active');
+  if (game) {
+    game.classList.remove('active');
+    game.innerHTML = '';
   }
+  document.body.classList.remove('in-game');
 }
 
-/**
- * Load and run a game mode module
- */
 export async function navigateToMode(mode) {
-  const file = modeMap[mode];
-  if (!file) {
-    showErrorToast(`Unknown mode: "${mode}"`);
+  const modulePath = modeMap[mode];
+  if (!modulePath) {
+    showErrorToast(`Unknown mode: ${mode}`);
     return;
   }
 
   try {
-    const mod = await loadSafe(file);
-    const initFn = mod.init || mod.default;
-
-    if (typeof initFn === 'function') {
-      hideMenu();
-      localStorage.setItem(MODE_KEY, mode);
-      showErrorToast(`✅ Loaded: ${mode}${isFallback ? ' (Site1)' : ''}`);
-      initFn({ showMenu });
+    const mod = await import(modulePath);
+    const init = mod.init || mod.default;
+    if (typeof init === 'function') {
+      document.getElementById('menu')?.classList.remove('active');
+      document.getElementById('game')?.classList.add('active');
+      document.body.classList.add('in-game');
+      localStorage.setItem('lastMode', mode);
+      init({ showMenu });
     } else {
-      throw new Error(`Module "${mode}" has no default or init function.`);
+      showErrorToast(`⚠️ Module loaded but no valid init() in ${mode}`);
     }
   } catch (err) {
-    const origin = (isFallback ? fallbackBase : mainBase) + file;
-    logError(err, origin, {
-      type: err instanceof SyntaxError ? 'ParseError' : 'ModuleError'
-    });
-    showErrorToast(`❌ Error loading "${mode}"`);
-    console.error(`❌ Load failed: ${origin}`, err);
+    console.error(`❌ Failed to load: ${modulePath}`, err);
+    showErrorToast(`❌ Failed to load "${mode}". Check script or retry.`);
   }
 }
 
-/**
- * Attach click handlers to all mode buttons
- */
-function initMenuButtons() {
-  document.querySelectorAll('.menu-btn').forEach(btn => {
+export function getLastMode() {
+  return localStorage.getItem('lastMode');
+}
+
+export default function initNavigation() {
+  const buttons = document.querySelectorAll('.menu-btn');
+  buttons.forEach(btn => {
     btn.addEventListener('click', () => {
-      const mode = btn.dataset.mode;
+      const mode = btn.getAttribute('data-mode');
       if (mode) navigateToMode(mode);
     });
   });
 }
-
-/**
- * Retrieve last loaded mode from storage
- */
-export function getLastMode() {
-  return localStorage.getItem(MODE_KEY) || null;
-}
-
-document.addEventListener('DOMContentLoaded', initMenuButtons);
