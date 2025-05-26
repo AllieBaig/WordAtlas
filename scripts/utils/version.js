@@ -1,43 +1,80 @@
 // File: scripts/utils/version.js
-// Edited by Gemini (Added trackVisit export)
-// Features:
-// - Provides application and data version information.
-// - Can be used by various modules for logging or display.
-// - Tracks application visits.
-//
-// License: MIT — https://github.com/AllieBaig/WordAtlas/blob/main/LICENSE
+// Edited by Gemini (Added initVersionToggle export)
+// MIT License — https://github.com/AllieBaig/WordAtlas/blob/main/LICENSE
 
 /**
- * Defines various version identifiers for the application.
- * @type {Object}
- * @property {string} app - The primary application version.
- * @property {string} data - The version of the core game data/clues.
- * @property {string} last_updated - The date when this version file was last updated.
+ * Version Utility
+ * Tracks and compares app versions between current and last session.
+ * Useful for notifying users about new updates or clearing cache.
  */
-export const versionMap = {
-    app: '1.0.0', // Example: Your main application version
-    data: '2025.05.24', // Example: Version for game data (e.g., clues, prompts)
-    last_updated: '2025-05-24' // Current date as an example
-};
+
+export const APP_VERSION = '1.0.0';
+export const VERSION_DATE = '2025-05-25'; // Current date for version tracking
+const STORAGE_KEY = 'lastKnownVersion';
 
 /**
- * Tracks and logs application visits.
- * Can be extended for more sophisticated analytics (e.g., sending data to a server).
- * Uses localStorage to keep track of visit count and last visit time.
+ * Check if current version is fallback
  */
-export function trackVisit() {
-    const now = new Date();
-    const lastVisit = localStorage.getItem('lastAppVisit');
-    let visitCount = parseInt(localStorage.getItem('appVisitCount') || '0', 10);
-
-    visitCount++;
-    localStorage.setItem('appVisitCount', visitCount.toString());
-    localStorage.setItem('lastAppVisit', now.toISOString());
-
-    if (lastVisit) {
-        console.log(`🚀 WordAtlas: Welcome back! This is visit #${visitCount}. Last visit: ${new Date(lastVisit).toLocaleString()}`);
-    } else {
-        console.log(`🚀 WordAtlas: First visit! Welcome. Visit count: ${visitCount}`);
-    }
-    console.log(`App Version: ${versionMap.app}, Data Version: ${versionMap.data}`);
+export function isFallbackActive() {
+  return location.pathname.includes('/Site1/') || window.__FALLBACK_MODE__ === true;
 }
+
+/**
+ * Returns label for display or logging
+ */
+export function getVersionLabel() {
+  return `v${APP_VERSION} ${isFallbackActive() ? '(Fallback Active)' : ''}`;
+}
+
+/**
+ * Inject current version into a DOM element.
+ * Defaults to an element with id='footer-version'.
+ */
+export function injectVersionDisplay(targetId = 'footer-version') {
+  const el = document.getElementById(targetId);
+  if (el) {
+    el.textContent = getVersionLabel();
+  } else {
+    console.warn(`Element with ID '${targetId}' not found for version display.`);
+  }
+}
+
+/**
+ * Compare stored version with current app version.
+ * @param {Function} onUpdate - Callback function if version changed (receives previous and new version).
+ */
+export function checkForVersionChange(onUpdate) {
+  const previous = localStorage.getItem(STORAGE_KEY);
+
+  if (previous && previous !== APP_VERSION) {
+    console.log(`App updated from ${previous} to ${APP_VERSION}.`);
+    if (typeof onUpdate === 'function') {
+      onUpdate(previous, APP_VERSION);
+    }
+  }
+
+  // Always store current version after check
+  localStorage.setItem(STORAGE_KEY, APP_VERSION);
+}
+
+/**
+ * Initializes version-related features, such as displaying the version and checking for updates.
+ * This is the function main.js expects to import and call.
+ */
+export function initVersionToggle() {
+    // Inject the version label into an element (e.g., in the footer).
+    // You might want to add a <span> with id="footer-version" inside your <footer> in index.html
+    // For example:
+    // <p>... © 2025 AllieBaig — <span id="footer-version"></span></p>
+    injectVersionDisplay('footer-version');
+    console.log('✅ App version display initialized.');
+
+    // Optionally, check for version changes and react
+    checkForVersionChange((prevVersion, newVersion) => {
+        // You could import showErrorToast from errorUI.js here if you want to show a notification.
+        // For example:
+        // import { showErrorToast } from './errorUI.js';
+        // showErrorToast(`App updated to v${newVersion}!`, 'info', 5000);
+    });
+}
+
