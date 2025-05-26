@@ -1,0 +1,98 @@
+<!-- File: scripts/utils/diff-tool.html -->
+<!--
+  WordAtlas Diff Tool
+  Compares two script URLs and shows the difference.
+  Includes download option.
+  MIT License — https://github.com/AllieBaig/WordAtlas/blob/main/LICENSE
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>📄 Diff Tool – WordAtlas</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body {
+      font-family: monospace;
+      background: #1a1a1a;
+      color: #eee;
+      padding: 1em;
+    }
+    input {
+      width: 100%;
+      padding: 0.5em;
+      margin: 0.5em 0;
+      font-family: monospace;
+    }
+    button {
+      padding: 0.6em 1.2em;
+      font-size: 1rem;
+      background: #0055aa;
+      color: white;
+      border: none;
+      border-radius: 0.3em;
+      margin-right: 1em;
+    }
+    pre {
+      background: #111;
+      padding: 1em;
+      overflow-x: auto;
+      border-radius: 0.5em;
+      white-space: pre-wrap;
+      margin-top: 1em;
+    }
+  </style>
+</head>
+<body>
+  <h1>🔍 WordAtlas Diff Tool</h1>
+  <p>Paste two GitHub URLs to compare and download the diff:</p>
+
+  <input id="url1" placeholder="🔗 Old script URL (e.g. Site1 version)">
+  <input id="url2" placeholder="🔗 New script URL (e.g. main version)">
+  <button id="compareBtn">Compare</button>
+  <button id="downloadBtn" disabled>Download Diff</button>
+
+  <pre id="diffOutput">⬅️ Diff output will appear here...</pre>
+
+  <script type="module">
+    import { createTwoFilesPatch } from 'https://cdn.jsdelivr.net/npm/diff@5.1.0/dist/diff.esm.min.js';
+
+    const url1Input = document.getElementById('url1');
+    const url2Input = document.getElementById('url2');
+    const compareBtn = document.getElementById('compareBtn');
+    const output = document.getElementById('diffOutput');
+    const downloadBtn = document.getElementById('downloadBtn');
+
+    compareBtn.addEventListener('click', async () => {
+      const url1 = url1Input.value.trim();
+      const url2 = url2Input.value.trim();
+
+      if (!url1 || !url2) return;
+
+      try {
+        const [oldText, newText] = await Promise.all([
+          fetch(url1).then(res => res.text()),
+          fetch(url2).then(res => res.text())
+        ]);
+
+        const patch = createTwoFilesPatch(url1, url2, oldText, newText);
+        output.textContent = patch;
+
+        // Enable download
+        downloadBtn.disabled = false;
+        downloadBtn.onclick = () => {
+          const blob = new Blob([patch], { type: 'text/plain' });
+          const a = document.createElement('a');
+          a.href = URL.createObjectURL(blob);
+          a.download = 'diff-output.diff';
+          a.click();
+        };
+      } catch (err) {
+        output.textContent = `❌ Error comparing files:\n${err.message}`;
+        downloadBtn.disabled = true;
+      }
+    });
+  </script>
+</body>
+</html>
