@@ -1,62 +1,75 @@
+/**
+ * Handles navigation between game modes and main menu screen.
+ * Dynamically imports mode scripts with language-based resolution.
+ * Used by: main.js to resume last mode on startup.
+ * Related: errorUI.js, settings.js, regular-xx.js mode files.
+ * Handles ES module default/init fallback and shows error if loading fails.
+ * MIT License: https://github.com/AllieBaig/WordAtlas/blob/main/LICENSE
+ * Timestamp: 2025-05-27 19:05 | File: scripts/gameNavigation.js
+ */
 
+import { showErrorToast } from './utils/errorUI.js';
 
-// File: scripts/gameNavigation.js
-// MIT License — https://github.com/AllieBaig/WordAtlas/blob/main/LICENSE
-
-import { hideMenu, showMenu } from './utils/menuVisibility.js';
-import { logError, logModuleImportFailure } from './utils/errorHandler.js';
-
-const asciiMode = localStorage.getItem('asciiMode') === 'true';
+const currentLang = localStorage.getItem('lang') || 'en';
 
 const modeMap = {
-  regular: asciiMode ? './ascii/regular.js' : './modes/regular.js',
-  wordRelic: asciiMode ? './ascii/wordRelic.js' : './modes/wordRelic.js',
-  wordSafari: asciiMode ? './ascii/wordSafari.js' : './modes/wordSafari.js',
-  dice: asciiMode ? './ascii/dice.js' : './modes/dice.js',
-  atlas: asciiMode ? './ascii/atlas.js' : './modes/atlas.js',
-  trail: asciiMode ? './ascii/trail.js' : './modes/trail.js',
-  versus: asciiMode ? './ascii/versus.js' : './modes/versus.js',
-  nearby: asciiMode ? './ascii/nearby.js' : './modes/nearby.js',
-  mixlingo: asciiMode ? './ascii/mixlingo.js' : './modes/mixlingo.js'
+  regular: `./modes/regular${currentLang === 'en' ? '' : '-' + currentLang}.js`,
+  wordRelic: './modes/wordRelic.js',
+  wordSafari: './modes/wordSafari.js',
+  dice: './modes/dice.js',
+  atlas: './modes/atlas.js',
+  trail: './modes/trail.js',
+  versus: './modes/versus.js',
+  nearby: './modes/nearby.js',
+  mixlingo: './modes/mixlingo.js'
 };
+
+export function showMenu() {
+  const menu = document.getElementById('menu');
+  const game = document.getElementById('game');
+  if (menu) menu.classList.add('active');
+  if (game) {
+    game.classList.remove('active');
+    game.innerHTML = '';
+  }
+  document.body.classList.remove('in-game');
+}
 
 export async function navigateToMode(mode) {
   const modulePath = modeMap[mode];
-
   if (!modulePath) {
-    logError('Navigation', `Invalid game mode: ${mode}`, location.href);
-    return alert(`Unknown mode: ${mode}`);
+    showErrorToast(`Unknown mode: ${mode}`);
+    return;
   }
 
   try {
     const mod = await import(modulePath);
-    if (typeof mod.init !== 'function') {
-      logModuleImportFailure(modulePath, 'init');
-      return alert(`⚠️ "${mode}" module loaded but has no export named "init"`);
+    const init = mod.init || mod.default;
+    if (typeof init === 'function') {
+      document.getElementById('menu')?.classList.remove('active');
+      document.getElementById('game')?.classList.add('active');
+      document.body.classList.add('in-game');
+      localStorage.setItem('lastMode', mode);
+      init({ showMenu });
+    } else {
+      showErrorToast(`⚠️ Module loaded but no valid init() in ${mode}`);
     }
-    mod.init({ showMenu });
   } catch (err) {
-    logError('ModuleLoad', err.message, modulePath);
-    alert(`⚠️ Failed to load "${mode}" mode. See error log.`);
+    console.error(`❌ Failed to load: ${modulePath}`, err);
+    showErrorToast(`❌ Failed to load "${mode}". Check script or retry.`);
   }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  const gameContainer = document.getElementById('game');
-  const buttons = document.querySelectorAll('.menu-btn');
+export function getLastMode() {
+  return localStorage.getItem('lastMode');
+}
 
+export default function initNavigation() {
+  const buttons = document.querySelectorAll('.menu-btn');
   buttons.forEach(btn => {
     btn.addEventListener('click', () => {
       const mode = btn.getAttribute('data-mode');
-      navigateToMode(mode);
+      if (mode) navigateToMode(mode);
     });
   });
-
-  if (!gameContainer) {
-    const div = document.createElement('section');
-    div.id = 'game';
-    div.className = 'game-container';
-    document.body.appendChild(div);
-  }
-});
-
+}
