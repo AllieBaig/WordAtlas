@@ -10,6 +10,14 @@
 
 // --- Essential Core App Initializations ---
 
+
+import { applyUserSettings, initSettingsPanel, toggleEasyMode } from './utils/settings.js';
+import { applyFontScaling } from './utils/fontControls.js';
+import { initVersionToggle } from './utils/version.js';
+import { injectDebugTools } from './utils/debugTools.js';
+import { bindGameButtons, bindEvent } from './utils/eventBinder.js';
+import initNavigation, { getLastMode, navigateToMode } from './gameNavigation.js';
+
 // this error  https://alliebaig.github.io/WordAtlas/scripts/fontControls.js net::ERR_ABORTED 404 (Not Found)
 // These functions apply saved settings, initialize UI components, and bind core events.
 //import { applyUserSettings, initSettingsPanel, toggleEasyMode } from './settings.js';
