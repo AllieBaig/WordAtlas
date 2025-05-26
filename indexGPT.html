@@ -1,24 +1,30 @@
-<!-- File: index.html -->
-<!-- MIT License — https://github.com/AllieBaig/WordAtlas/blob/main/LICENSE -->
+<!-- index.html -->
+<!--
+  WordAtlas Main Entry Point
+  Loads menu, handles game mode selection, footer tools.
+  Responsive UI using external CSS and shared variables.
+  MIT License: https://github.com/AllieBaig/WordAtlas/blob/main/LICENSE
+  Timestamp: 2025-05-27 22:30 | File: index.html
+-->
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <title>WordAtlas PWA</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#0055aa" />
-  <meta name="description" content="WordAtlas – A modular, multilingual word game PWA" />
-  <link rel="manifest" href="manifest.json" />
-  <link rel="stylesheet" href="styles/main.css" />
-  <link rel="icon" href="icons/icon-192.png" type="image/png" />
-  <title>WordAtlas</title>
+  <meta name="description" content="Explore word games across modes and languages." />
+
+  <!-- External CSS -->
+  <link rel="stylesheet" href="styles/variables.css" />
+  <link rel="stylesheet" href="styles/index.css" />
 </head>
 
 <body>
-
   <header>
-    <h1>🧭 WordAtlas</h1>
-    <p>Explore words, culture & language — one mode at a time.</p>
+    <h1>🌍 WordAtlas</h1>
+    <p>Select a game mode to begin</p>
   </header>
 
   <main id="menu" class="active">
@@ -31,47 +37,26 @@
       <button class="menu-btn" data-mode="trail">🪄 Trail of Letters</button>
       <button class="menu-btn" data-mode="versus">🤖 Play vs Computer</button>
       <button class="menu-btn" data-mode="nearby">📍 Play Nearby</button>
-      <button class="menu-btn" data-mode="mixlingo">🌍 MixLingo</button>
+      <button class="menu-btn" data-mode="mixlingo">🈲 MixLingo</button>
     </section>
   </main>
 
-  <div id="game" class="game-container hidden"></div>
+  <div id="game" class="game-container"></div>
 
   <footer>
-    <div class="footer-panel">
-      <button id="toggleSettings">⚙️ Settings</button>
-      <button id="toggleTools">🛠️ Tools</button>
-      <label class="easy-mode-toggle">
-        <input type="checkbox" id="easyToggle" />
-        🌟 Easy Mode
-      </label>
-      <label class="lang-select">
-        🌐 Language:
-        <select id="languageSelect">
-          <option value="en">English</option>
-          <option value="es">Español</option>
-          <option value="fr">Français</option>
-          <option value="de">Deutsch</option>
-          <option value="zh">中文</option>
-        </select>
-      </label>
-    </div>
-
-    <div id="settingsPanel" class="hidden"></div>
-    <div id="toolsPanel" class="hidden"></div>
-
-    <p id="footer-version" style="text-align: center; font-size: 0.8rem; opacity: 0.6;"></p>
+    <button id="settingsBtn">⚙️ Settings</button>
+    <button id="toolsBtn">🧰 Tools</button>
+    <button id="easyModeToggle">🌿 Easy Mode</button>
+    <select id="langSelect" class="lang-select" aria-label="Select language">
+      <option value="en">🇬🇧 English</option>
+      <option value="fr">🇫🇷 French</option>
+      <option value="de">🇩🇪 German</option>
+      <option value="es">🇪🇸 Spanish</option>
+    </select>
   </footer>
 
-  <!-- Main App Scripts -->
-  <script type="module">
-    if (location.search.includes('ascii')) {
-      import('./scripts/ascii/asciiUI.js').then(mod => mod.init?.());
-    } else {
-      import('./scripts/main.js').then(mod => mod.init?.());
-    }
-  </script>
-  <script src="scripts/serviceWorkerRegistration.js"></script>
-
+  <!-- Scripts -->
+  <script type="module" src="scripts/main.js"></script>
+  <script src="scripts/serviceWorkerRegistration.js" defer></script>
 </body>
 </html>
