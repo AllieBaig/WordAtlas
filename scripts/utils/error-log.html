@@ -1,144 +1,102 @@
+
+
+<!-- File: scripts/utils/error-log.html -->
+<!-- MIT License — https://github.com/AllieBaig/WordAtlas/blob/main/LICENSE -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Error Log Viewer</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>🪲 Error Log Viewer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
     body {
-      font-family: system-ui, sans-serif;
-      background: #1a1a1a;
-      color: #f0f0f0;
-      margin: 0;
+      font-family: monospace;
+      background: #111;
+      color: #eee;
       padding: 1rem;
     }
-    h1 {
-      margin-bottom: 0.2em;
+    h2 {
+      color: #0ff;
     }
     button {
-      margin: 0.3em;
-      padding: 0.5em 1em;
-      background: #444;
-      color: white;
-      border: none;
-      border-radius: 0.3em;
-      cursor: pointer;
+      margin: 0.5rem 0;
+      padding: 0.4rem 0.8rem;
+      font-size: 0.9rem;
     }
-    button:hover {
-      background: #666;
+    .entry {
+      border-left: 4px solid #444;
+      padding: 0.6rem;
+      margin-bottom: 1rem;
+      background: #222;
+      border-radius: 6px;
     }
-    .error-box {
-      background: #111;
-      border-left: 4px solid #f88;
-      margin: 1em 0;
-      padding: 1em;
-      border-radius: 0.4em;
+    .entry.moduleexport {
+      background: #330;
+      border-left-color: orange;
     }
-    .hint {
-      color: orange;
-      font-size: 0.9em;
-      margin-top: 0.4em;
+    .entry.moduleload {
+      background: #301010;
+      border-left-color: crimson;
     }
     pre {
       white-space: pre-wrap;
       word-break: break-word;
-      font-size: 0.85em;
     }
-    small {
-      color: #aaa;
+    .legend {
+      font-size: 0.85rem;
+      margin-bottom: 1rem;
     }
   </style>
 </head>
 <body>
 
-  <h1>🪲 Error Log Viewer</h1>
-  <p>View errors captured by the app.</p>
-
-  <div>
-    <button data-period="default">🔁 Session</button>
-    <button data-period="daily">📆 Today</button>
-    <button data-period="weekly">📅 This Week</button>
-    <button data-period="monthly">🗓️ This Month</button>
-    <button id="clearAllBtn">🧹 Clear Logs</button>
+  <h2>📋 Error Log</h2>
+  <div class="legend">
+    <strong>Legend:</strong>
+    <span style="color:orange;">ModuleExport</span> = missing export<br />
+    <span style="color:crimson;">ModuleLoad</span> = failed to load module<br />
+    <span style="color:#aaa;">Other</span> = misc runtime errors
   </div>
 
-  <div id="logContainer"></div>
+  <button onclick="clearLog()">🧹 Clear Log</button>
+
+  <div id="log"></div>
 
   <script type="module">
-    import { getErrorLog, clearErrorLog } from './scripts/utils/errorHandler.js';
+    import { getErrorLog, clearErrorLog } from './errorHandler.js';
 
-    const container = document.getElementById('logContainer');
-
-    function renderPeriod(period = 'default') {
-      const errors = getErrorLog(period);
-      container.innerHTML = '';
+    function renderLog() {
+      const container = document.getElementById('log');
+      const errors = getErrorLog().reverse();
 
       if (!errors.length) {
-        container.innerHTML = `<p><em>No errors found for "${period}".</em></p>`;
+        container.innerHTML = '<p>No errors logged.</p>';
         return;
       }
 
-      const header = document.createElement('p');
-      header.innerHTML = `<strong>${errors.length}</strong> error(s):`;
-      container.appendChild(header);
-
-      errors.forEach(e => {
-        const div = document.createElement('div');
-        div.className = 'error-box';
-        div.dataset.errorJson = JSON.stringify(e);
-
-        div.innerHTML = `
-          <strong>${e.type.toUpperCase()}:</strong> ${e.message}<br/>
-          <small>${e.source || ''} [${e.lineno || ''}:${e.colno || ''}]</small><br/>
-          <pre>${e.stack}</pre>
-          ${e.hint ? `<div class="hint">${e.hint}</div>` : ''}
-          <small>${e.time}</small><br/>
-          <button class="copy-error-btn" aria-label="Copy error to clipboard">📋 Copy</button>
+      container.innerHTML = errors.map(e => {
+        const typeClass = e.type?.toLowerCase() || '';
+        return `
+          <div class="entry ${typeClass}">
+            <strong>${e.type?.toUpperCase() || 'ERROR'}:</strong> ${e.message}<br/>
+            <small>${e.source || ''} [${e.lineno || ''}:${e.colno || ''}]</small><br/>
+            ${e.stack ? `<pre>${e.stack}</pre>` : ''}
+            <em>${e.time}</em>
+          </div>
         `;
-        container.appendChild(div);
-      });
-
-      document.querySelectorAll('.copy-error-btn').forEach(button => {
-        button.addEventListener('click', (event) => {
-          const errorBox = event.target.closest('.error-box');
-          const errorData = errorBox?.dataset.errorJson;
-          if (errorData) {
-            copyError(JSON.parse(errorData));
-          }
-        });
-      });
+      }).join('');
     }
 
-    function copyError(data) {
-      const text = `
-${data.type.toUpperCase()} — ${data.message}
-${data.source || ''} [${data.lineno || ''}:${data.colno || ''}]
-${data.stack || ''}
-${data.hint || ''}
-${data.time}
-      `.trim();
+    window.clearLog = () => {
+      if (confirm('Clear all stored error logs?')) {
+        clearErrorLog();
+        renderLog();
+      }
+    };
 
-      navigator.clipboard.writeText(text)
-        .then(() => alert('Copied to clipboard!'))
-        .catch(() => alert('Copy failed.'));
-    }
-
-    // Period buttons
-    document.querySelectorAll('button[data-period]').forEach(button => {
-      button.addEventListener('click', () => {
-        renderPeriod(button.dataset.period);
-      });
-    });
-
-    // Clear logs
-    document.getElementById('clearAllBtn').addEventListener('click', () => {
-      ['default', 'daily', 'weekly', 'monthly'].forEach(clearErrorLog);
-      container.innerHTML = '<p><em>All logs cleared.</em></p>';
-    });
-
-    // Auto-load daily errors
-    renderPeriod('daily');
+    renderLog();
   </script>
 
 </body>
 </html>
+
