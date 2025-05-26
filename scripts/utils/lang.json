@@ -1,0 +1,68 @@
+
+{
+  "en": {
+    "start": "Start Game",
+    "back": "Back to Menu",
+    "score": "Your Score",
+    "settings": "Settings",
+    "tools": "Tools",
+    "easyMode": "Easy Mode",
+    "selectLang": "Language",
+    "name": "Name",
+    "place": "Place",
+    "animal": "Animal",
+    "thing": "Thing"
+  },
+  "es": {
+    "start": "Iniciar Juego",
+    "back": "Volver al Menú",
+    "score": "Tu Puntuación",
+    "settings": "Configuraciones",
+    "tools": "Herramientas",
+    "easyMode": "Modo Fácil",
+    "selectLang": "Idioma",
+    "name": "Nombre",
+    "place": "Lugar",
+    "animal": "Animal",
+    "thing": "Cosa"
+  },
+  "fr": {
+    "start": "Commencer",
+    "back": "Retour au Menu",
+    "score": "Votre Score",
+    "settings": "Paramètres",
+    "tools": "Outils",
+    "easyMode": "Mode Facile",
+    "selectLang": "Langue",
+    "name": "Nom",
+    "place": "Lieu",
+    "animal": "Animal",
+    "thing": "Objet"
+  },
+  "de": {
+    "start": "Spiel Starten",
+    "back": "Zurück zum Menü",
+    "score": "Dein Punktestand",
+    "settings": "Einstellungen",
+    "tools": "Werkzeuge",
+    "easyMode": "Einfacher Modus",
+    "selectLang": "Sprache",
+    "name": "Name",
+    "place": "Ort",
+    "animal": "Tier",
+    "thing": "Ding"
+  },
+  "zh": {
+    "start": "开始游戏",
+    "back": "返回菜单",
+    "score": "你的得分",
+    "settings": "设置",
+    "tools": "工具",
+    "easyMode": "简易模式",
+    "selectLang": "语言",
+    "name": "名字",
+    "place": "地点",
+    "animal": "动物",
+    "thing": "物品"
+  }
+}
