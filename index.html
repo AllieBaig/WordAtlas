@@ -92,6 +92,16 @@
   <div id="game" class="game-container"></div>
 
   <!-- Scripts -->
+  
+  <!-- Main App Scripts -->
+  <script type="module">
+    if (location.search.includes('ascii')) {
+      import('./scripts/ascii/asciiUI.js').then(mod => mod.init?.());
+    } else {
+      import('./scripts/main.js').then(mod => mod.init?.());
+    }
+  </script>
+  
   <script type="module" src="scripts/gameNavigation.js"></script>
   <script src="scripts/serviceWorkerRegistration.js"></script>
   <script type="module">
