@@ -1,0 +1,35 @@
+/* styles/diff-tool.css */
+/* UI layout and styling for WordAtlas diff comparison page */
+
+body {
+  font-family: monospace;
+  background: #1a1a1a;
+  color: #eee;
+  padding: 1em;
+}
+
+input {
+  width: 100%;
+  padding: 0.5em;
+  margin: 0.5em 0;
+  font-family: monospace;
+}
+
+button {
+  padding: 0.6em 1.2em;
+  font-size: 1rem;
+  background: #0055aa;
+  color: white;
+  border: none;
+  border-radius: 0.3em;
+  margin-right: 1em;
+}
+
+pre {
+  background: #111;
+  padding: 1em;
+  overflow-x: auto;
+  border-radius: 0.5em;
+  white-space: pre-wrap;
+  margin-top: 1em;
+}
