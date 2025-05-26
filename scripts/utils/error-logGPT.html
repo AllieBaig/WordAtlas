@@ -1,4 +1,5 @@
-
+<!-- File: scripts/utils/error-log.html -->
+<!-- MIT License — https://github.com/AllieBaig/WordAtlas/blob/main/LICENSE -->
 
 <!DOCTYPE html>
 <html lang="en">
@@ -9,138 +10,113 @@
   <style>
     body {
       font-family: system-ui, sans-serif;
-      background: #1a1a1a;
-      color: #f0f0f0;
       margin: 0;
       padding: 1rem;
+      background: #111;
+      color: #eee;
     }
     h1 {
-      margin-bottom: 0.2em;
+      text-align: center;
+      color: #ffc107;
     }
-    button {
-      margin: 0.3em;
+    .controls {
+      text-align: center;
+      margin-bottom: 1em;
+    }
+    .controls button {
+      margin: 0.25em;
       padding: 0.5em 1em;
-      background: #444;
-      color: white;
-      border: none;
-      border-radius: 0.3em;
+      font-size: 0.9rem;
+      background: #333;
+      color: #fff;
+      border: 1px solid #666;
+      border-radius: 0.4em;
       cursor: pointer;
     }
-    button:hover {
-      background: #666;
-    }
-    .error-box {
-      background: #111;
-      border-left: 4px solid #f88;
-      margin: 1em 0;
+    .log-output {
+      max-height: 60vh;
+      overflow-y: auto;
+      background: #222;
       padding: 1em;
-      border-radius: 0.4em;
+      border-radius: 0.5em;
     }
-    .hint {
-      color: orange;
-      font-size: 0.9em;
-      margin-top: 0.4em;
-    }
-    pre {
+    .log-entry {
+      border-bottom: 1px solid #444;
+      margin-bottom: 1em;
+      padding-bottom: 0.5em;
       white-space: pre-wrap;
       word-break: break-word;
-      font-size: 0.85em;
     }
-    small {
-      color: #aaa;
+    .log-entry strong {
+      color: #ff6;
+    }
+    .footer {
+      text-align: center;
+      margin-top: 2em;
+      font-size: 0.8em;
+      opacity: 0.5;
     }
   </style>
 </head>
 <body>
 
-  <h1>🪲 Error Log Viewer</h1>
-  <p>View errors captured by the app.</p>
+  <h1>⚠️ Error Log Viewer</h1>
 
-  <div>
-    <button data-period="default">🔁 Session</button>
-    <button data-period="daily">📆 Today</button>
-    <button data-period="weekly">📅 This Week</button>
-    <button data-period="monthly">🗓️ This Month</button>
-    <button id="clearAllBtn">🧹 Clear Logs</button>
+  <div class="controls">
+    <button onclick="loadLog('today')">Today</button>
+    <button onclick="loadLog('week')">This Week</button>
+    <button onclick="loadLog('month')">This Month</button>
+    <button onclick="clearLog()">🧹 Clear Log</button>
+    <button onclick="generateTestErrors()">💥 Generate Test Errors</button>
   </div>
 
-  <div id="logContainer"></div>
+  <div id="log" class="log-output">Loading errors...</div>
+
+  <div class="footer" id="version"></div>
 
   <script type="module">
-    import { getErrorLog, clearErrorLog } from './scripts/utils/errorHandler.js';
+    import { getErrorLog, clearErrorLog } from './errorHandler.js';
+    import { getVersionLabel } from './version.js';
 
-    const container = document.getElementById('logContainer');
+    function format(entries) {
+      if (!entries.length) return '<p>No errors found.</p>';
+      return entries.map(e => `
+        <div class="log-entry">
+          <strong>${e.type}</strong>: ${e.message}<br/>
+          <em>${e.source} [${e.lineno}:${e.colno}]</em><br/>
+          <small>${e.time}</small><br/>
+          <pre>${e.stack}</pre>
+        </div>
+      `).join('');
+    }
 
-    function renderPeriod(period = 'default') {
-      const errors = getErrorLog(period);
-      container.innerHTML = '';
+    window.loadLog = (range) => {
+      const entries = getErrorLog(range);
+      document.getElementById('log').innerHTML = format(entries);
+    };
 
-      if (!errors.length) {
-        container.innerHTML = `<p><em>No errors found for "${period}".</em></p>`;
-        return;
+    window.clearLog = () => {
+      if (confirm('Clear all stored error logs?')) {
+        clearErrorLog();
+        loadLog('today');
+      }
+    };
+
+    window.generateTestErrors = () => {
+      // Simulated syntax error
+      try {
+        eval('let a = }');
+      } catch (e) {
+        console.error('Triggered Syntax Error:', e);
       }
 
-      const header = document.createElement('p');
-      header.innerHTML = `<strong>${errors.length}</strong> error(s):`;
-      container.appendChild(header);
+      // Simulated runtime error
+      Promise.reject(new Error('Test unhandled rejection'));
+    };
 
-      errors.forEach(e => {
-        const div = document.createElement('div');
-        div.className = 'error-box';
-        div.dataset.errorJson = JSON.stringify(e);
-
-        div.innerHTML = `
-          <strong>${e.type.toUpperCase()}:</strong> ${e.message}<br/>
-          <small>${e.source || ''} [${e.lineno || ''}:${e.colno || ''}]</small><br/>
-          <pre>${e.stack}</pre>
-          ${e.hint ? `<div class="hint">${e.hint}</div>` : ''}
-          <small>${e.time}</small><br/>
-          <button class="copy-error-btn" aria-label="Copy error to clipboard">📋 Copy</button>
-        `;
-        container.appendChild(div);
-      });
-
-      document.querySelectorAll('.copy-error-btn').forEach(button => {
-        button.addEventListener('click', (event) => {
-          const errorBox = event.target.closest('.error-box');
-          const errorData = errorBox?.dataset.errorJson;
-          if (errorData) {
-            copyError(JSON.parse(errorData));
-          }
-        });
-      });
-    }
-
-    function copyError(data) {
-      const text = `
-${data.type.toUpperCase()} — ${data.message}
-${data.source || ''} [${data.lineno || ''}:${data.colno || ''}]
-${data.stack || ''}
-${data.hint || ''}
-${data.time}
-      `.trim();
-
-      navigator.clipboard.writeText(text)
-        .then(() => alert('Copied to clipboard!'))
-        .catch(() => alert('Copy failed.'));
-    }
-
-    // Period buttons
-    document.querySelectorAll('button[data-period]').forEach(button => {
-      button.addEventListener('click', () => {
-        renderPeriod(button.dataset.period);
-      });
-    });
-
-    // Clear logs
-    document.getElementById('clearAllBtn').addEventListener('click', () => {
-      ['default', 'daily', 'weekly', 'monthly'].forEach(clearErrorLog);
-      container.innerHTML = '<p><em>All logs cleared.</em></p>';
-    });
-
-    // Auto-load daily errors
-    renderPeriod('daily');
+    // Init
+    loadLog('today');
+    document.getElementById('version').textContent = getVersionLabel();
   </script>
-
 </body>
 </html>
