@@ -1,10 +1,9 @@
-
-
 // File: scripts/modes/mixlingo.js
+// Edited by Gemini (Fixed imports and function calls)
 // MIT License — https://github.com/AllieBaig/WordAtlas/blob/main/LICENSE
 
 import { hideMenu } from '../utils/menuVisibility.js';
-import { getDailyWord } from '../utils/dailyPrompt.js';
+import { getDailyPrompt } from '../utils/dailyPrompt.js'; // Fixed: Changed getDailyWord to getDailyPrompt
 import { addXP } from '../utils/xpTracker.js';
 import { updateStreak } from '../utils/streak.js';
 
@@ -13,15 +12,17 @@ export async function init({ showMenu }) {
   const game = document.getElementById('game');
   if (!game) return;
 
-  const wordData = getDailyWord('mixlingo');
+  // Fixed: Changed getDailyWord to getDailyPrompt
+  const wordData = getDailyPrompt('mixlingo');
+  // Assuming wordData structure includes word, language, meaning, tip based on usage below
   const { word, language, meaning, tip } = wordData;
 
   game.innerHTML = `
     <section class="game-mode">
-      <h2>🌍 MixLingo Challenge (${language})</h2>
+      <h2>🌍 MixLingo Challenge (${language || 'Unknown Language'})</h2>
       <p><strong>Today's Word:</strong> <span class="word">${word}</span></p>
-      <p><strong>Meaning:</strong> ${meaning}</p>
-      <p><em>Usage Tip:</em> ${tip}</p>
+      <p><strong>Meaning:</strong> ${meaning || 'N/A'}</p>
+      <p><em>Usage Tip:</em> ${tip || 'N/A'}</p>
 
       <label for="sentence">✍️ Enter a sentence using "<strong>${word}</strong>":</label><br/>
       <textarea id="sentenceInput" placeholder="Write in English..." rows="3"></textarea>
@@ -52,12 +53,11 @@ export async function init({ showMenu }) {
     }
 
     feedback.innerHTML = `✅ Great! You've used "<strong>${word}</strong>" correctly. +10 XP!`;
-    addXP('mixlingo', 10);
-    updateStreak('mixlingo');
+    addXP(10, 'MixLingo Correct Sentence', 'mixlingo'); // Added reason and mode
+    updateStreak(); // Fixed: Removed 'mixlingo' argument, as updateStreak in streak.js takes no arguments
   });
 
   document.getElementById('hintBtn')?.addEventListener('click', () => {
     alert(`Hint: Try using "${word}" in a sentence about travel, emotion, or culture.`);
   });
 }
-
