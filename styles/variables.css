@@ -1,0 +1,30 @@
+
+/* styles/variables.css */
+/* Shared color and spacing system for all themes */
+
+:root {
+  /* Base colors */
+  --color-bg: #f9f9f9;
+  --color-fg: #222;
+  --color-primary: #0055aa;
+  --color-primary-dark: #004080;
+  --color-muted: #666;
+  --color-error: #c62828;
+  --color-success: #2e7d32;
+
+  /* Typography */
+  --font-main: system-ui, sans-serif;
+  --font-mono: monospace;
+
+  /* Spacing */
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 1rem;
+  --space-lg: 2rem;
+  --radius: 0.5rem;
+  --radius-lg: 1rem;
+
+  /* Transitions */
+  --trans-fast: 0.2s ease;
+  --trans-slow: 0.4s ease;
+}
