@@ -1,3 +1,6 @@
+
+// 25th 7:10
+
 // File: scripts/main.js
 // Edited by Gemini (Consolidated user's new logic with all essential initializations)
 // MIT License — https://github.com/AllieBaig/WordAtlas/blob/main/LICENSE
@@ -9,31 +12,13 @@
  */
 
 // --- Essential Core App Initializations ---
-
-
-import { registerGlobalErrorHandlers } from './utils/errorHandler.js';
-import { initFontSelector } from './utils/fontControls.js';
-import { initSettingsPanel } from './utils/settings.js';
-import { injectDebugTools } from './utils/debugTools.js';
-import { versionMap } from './utils/version.js'; // <-- CHANGE THIS LINE: Import 'versionMap'
-
-
-/////////////
-//import { applyUserSettings, initSettingsPanel, toggleEasyMode } from './utils/settings.js';
-//import { applyFontScaling } from './utils/fontControls.js';
-//import { initVersionToggle } from './utils/version.js';
-//import { injectDebugTools } from './utils/debugTools.js';
-import { bindGameButtons, bindEvent } from './utils/eventBinder.js';
-import initNavigation, { getLastMode, navigateToMode } from './gameNavigation.js';
-
-// this error  https://alliebaig.github.io/WordAtlas/scripts/fontControls.js net::ERR_ABORTED 404 (Not Found)
 // These functions apply saved settings, initialize UI components, and bind core events.
-//import { applyUserSettings, initSettingsPanel, toggleEasyMode } from './settings.js';
-//import { applyFontScaling } from './fontControls.js';
-//import { initVersionToggle } from './version.js';
-//import { injectDebugTools } from './debugTools.js'; // Corrected import name
-//import { bindGameButtons, bindEvent } from './eventBinder.js';
-//import initNavigation, { getLastMode, navigateToMode } from './gameNavigation.js'; // Default import for initNavigation
+import { applyUserSettings, initSettingsPanel, toggleEasyMode } from './utils/settings.js';
+import { applyFontScaling } from './utils/fontControls.js';
+import { initVersionToggle } from './utils/version.js';
+import { injectDebugTools } from './utils/debugTools.js'; // Corrected import name
+import { bindGameButtons, bindEvent } from './utils/eventBinder.js';
+import initNavigation, { getLastMode, navigateToMode } from './gameNavigation.js'; // Default import for initNavigation
 
 // No direct import for showErrorToast here if it's primarily used by other modules.
 // If main.js directly uses it, uncomment:
