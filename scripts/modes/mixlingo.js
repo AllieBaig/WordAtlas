@@ -1,4 +1,4 @@
-// File: scripts/modes/mixlingo.js
+// File: scripts/modes/mixlingo.js/
 // Edited by Gemini (Fixed imports and function calls)
 // MIT License — https://github.com/AllieBaig/WordAtlas/blob/main/LICENSE
 
