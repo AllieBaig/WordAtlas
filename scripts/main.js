@@ -74,7 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // 🌐 Language selector handling
-  const langSelector = document.getElementById('languageSelect');
+  const langSelector = document.getElementById('langSelect');
   if (langSelector) {
     langSelector.value = localStorage.getItem('lang') || 'en';
 
