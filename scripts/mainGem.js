@@ -1,8 +1,6 @@
-
-// 25th 7:20
-
+// Timestamp: 2025-05-27 17:35
 // File: scripts/main.js
-// Edited by Gemini (Consolidated to match user's NEW settings.js and preserve other fixes)
+// Edited by Gemini (Adapted to new toggle APIs, re-added missing features)
 // MIT License — https://github.com/AllieBaig/WordAtlas/blob/main/LICENSE
 
 /**
@@ -12,80 +10,56 @@
  */
 
 // --- Essential Core App Initializations ---
-// These functions apply saved settings, initialize UI components, and bind core events.
-// NOTE: Imports and calls related to settings are adjusted based on your latest settings.js
-import { getSettings, injectSettingsPanel, setFont, toggleEasyMode } from './utils/settings.js'; // Updated imports from settings.js
-import { applyFontScaling } from './utils/fontControls.js'; // Assumed still needed and functional
-import { initVersionToggle } from './utils/version.js'; // Assumed still needed and functional
-import { injectDebugTools } from './utils/debugTools.js'; // Assumed still needed and functional
-import { bindGameButtons, bindEvent } from './utils/eventBinder.js'; // Assumed still needed and functional
-import initNavigation, { getLastMode, navigateToMode } from './gameNavigation.js'; // Assumed still needed and functional
-
-// No direct import for showErrorToast here if it's primarily used by other modules (as per your structure).
+// NOTE: All imports are now consistent with the latest files provided/fixed.
+import { applyUserSettings, initSettingsPanel, toggleSettingsPanel, toggleEasyMode } from './utils/settings.js';
+import { applyFontScaling } from './utils/fontControls.js';
+import { initVersionToggle } from './utils/version.js';
+import { initDebugTools, toggleToolsPanel } from './utils/debugTools.js'; // Changed injectDebugTools to initDebugTools
+import { bindGameButtons } from './utils/eventBinder.js'; // bindEvent not directly used in main.js now
+import initNavigation, { getLastMode, navigateToMode } from './gameNavigation.js';
+import { registerGlobalErrorHandlers } from './utils/errorHandler.js';
 
 document.addEventListener('DOMContentLoaded', () => {
   const startTime = performance.now();
 
-  // 1. Get initial settings (from user's new settings.js)
-  const initialSettings = getSettings();
+  // Initialize error logging globally
+  registerGlobalErrorHandlers();
 
-  // 2. Apply initial font setting
-  setFont(initialSettings.font); // Uses the setFont from your new settings.js
+  // 1. Apply saved user settings (font, theme, contrast)
+  applyUserSettings();
 
-  // 3. Apply easy mode class to body based on initial setting
-  document.body.classList.toggle('easy-mode', initialSettings.easyMode);
+  // 2. Apply font scaling based on user settings
+  applyFontScaling();
 
-  // 4. Apply font scaling (from fontControls.js)
-  applyFontScaling(); // This assumes applyFontScaling from fontControls.js works alongside setFont.
-
-  // 5. Initialize app version mode toggle (in footer)
+  // 3. Initialize app version mode toggle (in footer)
   initVersionToggle();
 
-  // 6. Initialize debug tools panel (if `?debug` is in URL)
-  // This function *creates* the panel and appends it to the body.
-  injectDebugTools();
+  // 4. Initialize debug tools panel (if `?debug` is in URL)
+  initDebugTools(); // Initialize the panel content and internal listeners
 
-  // 7. Initialize main game navigation (ensures game container exists if needed)
+  // 5. Initialize main game navigation (ensures game container exists if needed)
   initNavigation();
 
-  // 8. Bind main game menu buttons
-  bindGameButtons();
+  // 6. Initialize settings panel content and its internal listeners
+  // This needs to be called after settingsPanel element is in DOM, and before its toggle is used.
+  initSettingsPanel();
 
-  // --- User's Specific UI Toggle Logic (Integrated and Corrected) ---
+
+  // --- Bind UI Toggle Logic ---
+
+  // Footer buttons to toggle panels (using new toggle functions)
+  document.getElementById('toggleSettings')?.addEventListener('click', toggleSettingsPanel);
+  document.getElementById('toggleTools')?.addEventListener('click', toggleToolsPanel);
 
   // Easy Mode toggle in footer
-  const easyToggle = document.getElementById('easyToggle');
-  if (easyToggle) {
-    easyToggle.checked = initialSettings.easyMode; // Set initial state from settings
-    bindEvent(easyToggle, 'change', (e) => {
-      toggleEasyMode(e.target.checked);
-      // Re-apply easy mode class to body, as toggleEasyMode in settings.js only saves to localStorage
-      document.body.classList.toggle('easy-mode', e.target.checked);
-    });
+  const easyToggleFooter = document.getElementById('easyToggle');
+  if (easyToggleFooter) {
+    easyToggleFooter.checked = localStorage.getItem('easyMode') === 'true'; // Set initial state
+    easyToggleFooter.addEventListener('change', toggleEasyMode); // Pass event object to toggleEasyMode
   }
 
-  // Toggle Settings panel
-  const settingsBtn = document.getElementById('toggleSettings'); // Assuming you have this button in index.html
-  const settingsPanel = document.getElementById('settingsPanel');
-  if (settingsBtn && settingsPanel) {
-    bindEvent(settingsBtn, 'click', () => {
-      settingsPanel.classList.toggle('hidden');
-      // Call injectSettingsPanel. This function handles setting innerHTML and binding events.
-      // Since it recreates innerHTML each time, no 'initialized' check is strictly needed for its core function.
-      injectSettingsPanel(); // No argument needed as per your latest settings.js
-    });
-  }
-
-  // Toggle Tools panel (This logic assumes injectDebugTools creates the panel once)
-  const toolsBtn = document.getElementById('toggleTools'); // Assuming you have this button in index.html
-  const toolsPanel = document.getElementById('toolsPanel'); // Assuming you have this panel in index.html
-  if (toolsBtn && toolsPanel) {
-    bindEvent(toolsBtn, 'click', () => {
-      // The debug panel is created by injectDebugTools on load (if ?debug is present).
-      // Here, we just toggle its visibility.
-      toolsPanel.classList.toggle('hidden');
-    });
-  }
+  // Bind main game menu buttons (this also handles showing/hiding menu and navigating to modes)
+  bindGameButtons();
 
   // Auto-resume last mode if available
   const last = getLastMode();
