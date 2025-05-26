@@ -10,12 +10,12 @@
 
 // --- Essential Core App Initializations ---
 // These functions apply saved settings, initialize UI components, and bind core events.
-import { applyUserSettings, initSettingsPanel, toggleEasyMode } from '/scripts/utils/settings.js';
-import { applyFontScaling } from '/scripts/utils/fontControls.js';
-import { initVersionToggle } from '/scripts/utils/version.js';
-import { injectDebugTools } from '/scripts/utils/debugTools.js'; // Corrected import name
-import { bindGameButtons, bindEvent } from '/scripts/utils/eventBinder.js';
-import initNavigation, { getLastMode, navigateToMode } from '/gameNavigation.js'; // Default import for initNavigation
+import { applyUserSettings, initSettingsPanel, toggleEasyMode } from './scripts/utils/settings.js';
+import { applyFontScaling } from './scripts/utils/fontControls.js';
+import { initVersionToggle } from './scripts/utils/version.js';
+import { injectDebugTools } from './scripts/utils/debugTools.js'; // Corrected import name
+import { bindGameButtons, bindEvent } from './scripts/utils/eventBinder.js';
+import initNavigation, { getLastMode, navigateToMode } from './gameNavigation.js'; // Default import for initNavigation
 
 //import { applyUserSettings, initSettingsPanel, toggleEasyMode } from './settings.js';
 //import { applyFontScaling } from './fontControls.js';
