@@ -1,86 +1,57 @@
 /* styles/profile.css */
-/* Styling for profile screen: nickname, recovery, QR, badges */
 
 body {
-  font-family: system-ui, sans-serif;
-  background: #f2f2f2;
-  color: #222;
-  padding: 1.5rem;
-  line-height: 1.6;
+  font-family: var(--font-main);
+  background: var(--color-bg);
+  color: var(--color-fg);
+  padding: var(--space-lg);
 }
 
 .profile-container {
   max-width: 600px;
   margin: auto;
   background: white;
-  padding: 1.5rem;
-  border-radius: 0.75rem;
+  padding: var(--space-lg);
+  border-radius: var(--radius-lg);
   box-shadow: 0 0 10px rgba(0,0,0,0.1);
 }
 
-.profile-container h2 {
-  margin-bottom: 1rem;
-  font-size: 1.4rem;
-}
-
-.profile-section {
-  margin-bottom: 1.5rem;
-}
-
 label {
-  display: block;
   font-weight: bold;
-  margin-bottom: 0.4rem;
+  margin-bottom: var(--space-xs);
 }
 
 input, textarea {
   width: 100%;
-  padding: 0.6rem;
+  padding: var(--space-sm);
   border: 1px solid #ccc;
-  border-radius: 0.4rem;
-  margin-bottom: 0.8rem;
+  border-radius: var(--radius);
+  margin-bottom: var(--space-md);
   font-size: 1rem;
 }
 
 button {
-  padding: 0.7rem 1.4rem;
-  font-size: 1rem;
-  background: #0055aa;
+  padding: var(--space-sm) var(--space-md);
+  background: var(--color-primary);
+  border-radius: var(--radius);
   color: white;
   border: none;
-  border-radius: 0.4rem;
-  cursor: pointer;
-  margin-top: 0.5rem;
+  transition: background var(--trans-fast);
 }
 
 button:hover {
-  background: #004080;
+  background: var(--color-primary-dark);
 }
 
 .badge {
-  display: inline-block;
   background: #eee;
-  border-radius: 1rem;
-  padding: 0.4rem 1rem;
-  margin: 0.25rem;
+  border-radius: var(--radius-lg);
+  padding: var(--space-xs) var(--space-sm);
+  margin: var(--space-xs);
   font-size: 0.9rem;
-  color: #333;
-}
-
-.qr-box {
-  text-align: center;
-  margin-top: 1rem;
 }
 
 .qr-box canvas {
   margin: auto;
   display: block;
-}
-
-small.hint {
-  display: block;
-  font-size: 0.85rem;
-  color: #666;
-  margin-top: -0.5rem;
-  margin-bottom: 0.8rem;
 }
