@@ -1,0 +1,27 @@
+
+[
+  {
+    "word": "Hola",
+    "language": "Spanish",
+    "meaning": "Hi or Hello",
+    "tip": "Common informal greeting."
+  },
+  {
+    "word": "Bonjour",
+    "language": "French",
+    "meaning": "Hello",
+    "tip": "Use it in polite greetings."
+  },
+  {
+    "word": "Guten Tag",
+    "language": "German",
+    "meaning": "Good day",
+    "tip": "Say it mid-day formally."
+  },
+  {
+    "word": "Ciao",
+    "language": "Italian",
+    "meaning": "Hi / Bye",
+    "tip": "Use it casually with friends."
+  }
+]
