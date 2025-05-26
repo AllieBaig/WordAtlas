@@ -84,6 +84,6 @@ document.addEventListener('DOMContentLoaded', () => {
       location.reload(); // Refresh to apply language-specific script
     });
   }
-});
+//});
 
 
