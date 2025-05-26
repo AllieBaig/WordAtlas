@@ -1,0 +1,7 @@
+
+{
+  "name": ["Alice", "Bernard", "Chloé", "Denis", "Élodie"],
+  "place": ["Paris", "Lyon", "Marseille", "Toulouse", "Nice"],
+  "animal": ["Chat", "Chien", "Lapin", "Oiseau", "Poisson"],
+  "thing": ["Livre", "Table", "Chaise", "Stylo", "Lampe"]
+}
