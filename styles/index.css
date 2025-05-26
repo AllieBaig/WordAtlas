@@ -1,45 +1,42 @@
-
 /* styles/index.css */
-/* Layout & menu styling for WordAtlas main interface */
 
 body {
-  font-family: system-ui, sans-serif;
+  font-family: var(--font-main);
   margin: 0;
   padding: 0;
-  background: #fafafa;
-  color: #222;
+  background: var(--color-bg);
+  color: var(--color-fg);
 }
 
 header {
   text-align: center;
-  padding: 1rem;
+  padding: var(--space-md);
   background-color: #333;
   color: white;
 }
 
 main {
-  padding: 1rem;
+  padding: var(--space-md);
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: var(--space-md);
   max-width: 800px;
   margin: auto;
 }
 
 button, .menu-btn {
   font-size: 1.2rem;
-  padding: 1rem;
+  padding: var(--space-md);
   width: 100%;
-  max-width: 100%;
-  background: #0055aa;
+  background: var(--color-primary);
   color: white;
   border: none;
-  border-radius: 0.5rem;
-  transition: background 0.3s;
+  border-radius: var(--radius);
+  transition: background var(--trans-fast);
 }
 
 button:hover {
-  background: #004080;
+  background: var(--color-primary-dark);
 }
 
 @media (min-width: 600px) {
@@ -57,16 +54,7 @@ button:hover {
 
 footer {
   text-align: center;
-  padding: 1em;
+  padding: var(--space-sm);
   font-size: 0.9em;
-  color: #666;
-}
-
-.lang-select {
-  font-size: 0.9rem;
-  margin-top: 0.5em;
-}
-
-.in-game main {
-  display: none;
+  color: var(--color-muted);
 }
