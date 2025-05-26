@@ -7,12 +7,13 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#0055aa" />
-  <meta name="description" content="WordAtlas – A modular PWA for word and language learning" />
+  <meta name="description" content="WordAtlas – A modular, multilingual word game PWA" />
   <link rel="manifest" href="manifest.json" />
   <link rel="stylesheet" href="styles/main.css" />
   <link rel="icon" href="icons/icon-192.png" type="image/png" />
   <title>WordAtlas</title>
 </head>
+
 <body>
 
   <header>
@@ -44,18 +45,33 @@
         <input type="checkbox" id="easyToggle" />
         🌟 Easy Mode
       </label>
+      <label class="lang-select">
+        🌐 Language:
+        <select id="languageSelect">
+          <option value="en">English</option>
+          <option value="es">Español</option>
+          <option value="fr">Français</option>
+          <option value="de">Deutsch</option>
+          <option value="zh">中文</option>
+        </select>
+      </label>
     </div>
 
     <div id="settingsPanel" class="hidden"></div>
     <div id="toolsPanel" class="hidden"></div>
 
-    <p style="font-size: 0.85em; opacity: 0.6; text-align: center;">
-      © 2025 AllieBaig — WordAtlas is a modular, multilingual word game PWA.
-    </p>
+    <p id="footer-version" style="text-align: center; font-size: 0.8rem; opacity: 0.6;"></p>
   </footer>
 
-  <!-- App Scripts -->
-  <script type="module" src="scripts/main.js"></script>
+  <!-- Main App Scripts -->
+  <script type="module">
+    if (location.search.includes('ascii')) {
+      import('./scripts/ascii/asciiUI.js').then(mod => mod.init?.());
+    } else {
+      import('./scripts/main.js').then(mod => mod.init?.());
+    }
+  </script>
   <script src="scripts/serviceWorkerRegistration.js"></script>
+
 </body>
 </html>
