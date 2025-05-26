@@ -72,3 +72,18 @@ document.addEventListener('DOMContentLoaded', () => {
   const loadTime = (performance.now() - startTime).toFixed(1);
   console.log(`⚡ WordAtlas UI loaded in ${loadTime}ms`);
 });
+
+// 🌐 Language selector handling
+  const langSelector = document.getElementById('languageSelect');
+  if (langSelector) {
+    langSelector.value = localStorage.getItem('lang') || 'en';
+
+    langSelector.addEventListener('change', (e) => {
+      const selectedLang = e.target.value;
+      localStorage.setItem('lang', selectedLang);
+      location.reload(); // Refresh to apply language-specific script
+    });
+  }
+});
+
+
