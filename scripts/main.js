@@ -11,10 +11,18 @@
 // --- Essential Core App Initializations ---
 
 
-import { applyUserSettings, initSettingsPanel, toggleEasyMode } from './utils/settings.js';
-import { applyFontScaling } from './utils/fontControls.js';
-import { initVersionToggle } from './utils/version.js';
+import { registerGlobalErrorHandlers } from './utils/errorHandler.js';
+import { initFontSelector } from './utils/fontControls.js';
+import { initSettingsPanel } from './utils/settings.js';
 import { injectDebugTools } from './utils/debugTools.js';
+import { versionMap } from './utils/version.js'; // <-- CHANGE THIS LINE: Import 'versionMap'
+
+
+/////////////
+//import { applyUserSettings, initSettingsPanel, toggleEasyMode } from './utils/settings.js';
+//import { applyFontScaling } from './utils/fontControls.js';
+//import { initVersionToggle } from './utils/version.js';
+//import { injectDebugTools } from './utils/debugTools.js';
 import { bindGameButtons, bindEvent } from './utils/eventBinder.js';
 import initNavigation, { getLastMode, navigateToMode } from './gameNavigation.js';
 
