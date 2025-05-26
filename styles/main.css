@@ -1,208 +1,131 @@
 /* File: styles/main.css */
 /* MIT License — https://github.com/AllieBaig/WordAtlas/blob/main/LICENSE */
 
-/* --- Responsive Font Base --- */
-/* Set a flexible base font size on the root HTML element. */
-/* This makes 1rem scale smoothly from 14px on small screens to 18px on large screens. */
-/* All other font-sizes using 'rem' units will automatically scale based on this. */
-html {
-  font-size: clamp(14px, 2.5vw, 18px); /* Min 14px, Preferred 2.5% of viewport width, Max 18px */
-}
-
-/* --- Base Layout --- */
-body {
-  font-family: system-ui, sans-serif;
+/* General Reset */
+* {
+  box-sizing: border-box;
   margin: 0;
   padding: 0;
-  background: #f9f9f9;
-  color: #222;
-  line-height: 1.6;
-  font-size: 1rem; /* Base font size for body, now responsive due to html font-size */
 }
 
-header {
-  background: #0055aa;
-  color: white;
-  text-align: center;
-  padding: 1rem;
+body {
+  font-family: var(--main-font, 'Domine', system-ui, sans-serif);
+  background: #f5f5f5;
+  color: #222;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 3rem;
+  transition: font-size 0.2s ease;
+}
+
+/* Typography Scaling */
+html {
+  font-size: 16px;
 }
 
 h1 {
-  margin: 0.5rem 0;
-  /* H1 already uses clamp, but now its rem values (if any) will also be responsive */
-  font-size: clamp(1.8rem, 5vw, 2.5rem); /* Adjusted for slightly larger appearance */
+  font-size: 1.8rem;
+  margin: 0.5em 0;
 }
 
-main, #game {
+header {
+  text-align: center;
   padding: 1rem;
-  max-width: 800px;
-  margin: auto;
+  background: #0055aa;
+  color: #fff;
 }
 
-/* --- Menu Visibility --- */
-#menu.active {
-  display: block;
+main {
+  padding: 1rem;
+  max-width: 900px;
+  margin: auto;
+  flex: 1;
 }
-#menu:not(.active) {
-  display: none;
+
+.mode-buttons {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
 }
+
+button.menu-btn {
+  font-size: 1rem;
+  padding: 1em;
+  background: #0077cc;
+  color: #fff;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+button.menu-btn:hover {
+  background: #005fa3;
+}
+
+/* Game area */
 #game {
+  padding: 1rem;
   display: none;
 }
 #game.active {
   display: block;
 }
 
-/* --- Mode Buttons (Main Menu) --- */
-.mode-buttons {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.menu-btn {
-  font-size: 1.1rem; /* Now responsive based on html font-size */
+/* Footer */
+footer {
+  background: #111;
+  color: #ccc;
   padding: 1rem;
-  background: #0055aa;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background 0.3s;
-  width: 100%;
+  margin-top: auto;
+  font-size: 0.9rem;
 }
 
-.menu-btn:hover {
-  background: #003f80;
-}
-
-/* --- Game Mode Layout & Text Scaling --- */
-.mode-header {
+.footer-panel {
   display: flex;
-  align-items: center;
+  flex-wrap: wrap;
+  justify-content: center;
   gap: 1rem;
-  margin-bottom: 1rem;
-  flex-wrap: wrap; /* Allow wrapping on very small screens */
-}
-
-.mode-header h2 {
-  margin: 0;
-  font-size: clamp(1.2rem, 4vw, 1.8rem); /* Make game H2 responsive */
-  flex-shrink: 0; /* Prevent shrinking if button forces it */
-}
-
-.mode-header button {
-  padding: 0.4rem 0.8rem;
-  background: #ccc;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 0.9rem; /* Make header button font responsive */
-}
-
-/* General game mode text */
-#game p {
-  font-size: 1rem; /* Responsive paragraphs */
-  margin-bottom: 0.8rem;
-}
-
-/* Form elements within game modes */
-#game form label {
-  font-size: 1rem; /* Responsive labels */
-  display: block; /* Ensure labels are on their own line */
   margin-bottom: 0.5rem;
 }
 
-#game form input[type="text"] {
-  font-size: 1rem; /* Responsive input text */
-  padding: 0.5rem;
-  margin-top: 0.2rem;
-  width: calc(100% - 1.2rem); /* Account for padding */
-  max-width: 300px; /* Limit input width on larger screens */
-  box-sizing: border-box; /* Include padding/border in width */
-  border: 1px solid #ddd;
+footer button,
+.easy-mode-toggle select,
+.easy-mode-toggle input {
+  font-size: 0.9rem;
+  padding: 0.4em 0.8em;
   border-radius: 4px;
-}
-
-#game form button[type="submit"] {
-  font-size: 1rem; /* Responsive submit button text */
-  padding: 0.8rem 1.5rem;
-  background: #28a745;
-  color: white;
   border: none;
-  border-radius: 8px;
+  background: #333;
+  color: #fff;
   cursor: pointer;
-  margin-top: 1rem;
-  transition: background 0.3s;
 }
 
-#game form button[type="submit"]:hover {
-  background: #218838;
+footer label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
 }
 
-/* Table specific styles for Versus mode */
-#game table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 1rem;
-  font-size: 1rem; /* Responsive table text */
+/* Hidden panel toggle areas */
+#settingsPanel,
+#toolsPanel {
+  background: #222;
+  color: #eee;
+  padding: 1rem;
+  margin: 0.5rem auto;
+  max-width: 900px;
+  border-radius: 0.5em;
+  display: none;
+}
+#settingsPanel:not(.hidden),
+#toolsPanel:not(.hidden) {
+  display: block;
 }
 
-#game table th, #game table td {
-  border: 1px solid #eee;
-  padding: 0.8rem;
-  text-align: left;
-}
-
-#game table th {
-  background-color: #f2f2f2;
-}
-
-#game table td input {
-    width: 100%; /* Make input fill cell */
-    padding: 0.5rem;
-    font-size: 1rem;
-    box-sizing: border-box;
-}
-
-.ai-answer {
-    font-weight: bold;
-}
-
-/* --- Footer --- */
-footer {
-  text-align: center;
-  padding: 1rem 0;
-  font-size: 0.85rem; /* Responsive footer text */
-  color: #555;
-}
-
-/* --- Responsive Columns for Menu --- */
-@media (min-width: 600px) {
-  .mode-buttons {
-    flex-direction: row;
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-
-  .menu-btn {
-    flex: 1 1 45%;
-    max-width: 300px;
-  }
-}
-
-/* --- Font Scaling Classes (used with + / - buttons) --- */
-/* These will now adjust the 'rem' base proportionally */
-body.fs-small html {
-  font-size: clamp(12px, 2vw, 16px);
-}
-body.fs-medium html {
-  font-size: clamp(14px, 2.5vw, 18px); /* Default HTML font-size */
-}
-body.fs-large html {
-  font-size: clamp(16px, 3vw, 20px);
-}
-body.fs-xlarge html {
-  font-size: clamp(18px, 3.5vw, 22px);
+/* Utilities */
+.hidden {
+  display: none !important;
 }
 
