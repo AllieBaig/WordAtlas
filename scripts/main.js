@@ -42,6 +42,10 @@ import initNavigation, { getLastMode, navigateToMode } from './gameNavigation.js
 document.addEventListener('DOMContentLoaded', () => {
   const startTime = performance.now();
 
+  // added by Allie only global error
+  // Initialize error logging globally
+  registerGlobalErrorHandlers();
+
   // 1. Apply saved user settings (font, theme, contrast)
   applyUserSettings();
 
