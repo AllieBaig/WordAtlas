@@ -1,0 +1,40 @@
+<!-- 
+File: index-backup
+Forces Site1 scripts. Always loads from backup.
+
+MIT License
+Copyright (c) 2025 AllieBaig
+Licensed under the MIT License.
+https://github.com/AllieBaig/WordAtlas/blob/main/LICENSE
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0055aa" />
+  <title>WordAtlas — Backup</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="stylesheet" href="styles/main.css" />
+</head>
+<body>
+  <main>
+    <h1>WordAtlas (Backup)</h1>
+    <section class="mode-buttons">
+      <button class="menu-btn" data-mode="regular">🧠 Solo Mode</button>
+      <button class="menu-btn" data-mode="wordRelic">🏺 Word Relic</button>
+      <button class="menu-btn" data-mode="wordSafari">🦁 Word Safari</button>
+      <button class="menu-btn" data-mode="dice">🎲 Dice Challenge</button>
+      <button class="menu-btn" data-mode="atlas">🗺️ Word Atlas</button>
+      <button class="menu-btn" data-mode="trail">🪄 Trail of Letters</button>
+      <button class="menu-btn" data-mode="versus">🤖 Play vs Computer</button>
+      <button class="menu-btn" data-mode="nearby">📍 Play Nearby</button>
+    </section>
+    <section id="game" class="game-container"></section>
+  </main>
+  <script type="module" src="Site1/scripts/main.js"></script>
+  <script type="module" src="Site1/scripts/gameNavigation.js"></script>
+  <script src="Site1/scripts/serviceWorkerRegistration.js"></script>
+</body>
+</html>
+

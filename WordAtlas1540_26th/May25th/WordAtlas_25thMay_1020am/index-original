@@ -1,0 +1,87 @@
+
+
+<!-- 
+File: index-original.html
+Purpose: Manual script-only tester — NO fallback
+
+MIT License
+Copyright (c) 2025 AllieBaig
+Licensed under the MIT License.
+See https://github.com/AllieBaig/naptpwa/blob/main/LICENSE for details.
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#aa0000" />
+  <meta name="description" content="NAPT Word Game — Original Debug Entry" />
+  <title>NAPT Debug – Original Scripts</title>
+
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" href="icons/icon-192.png" />
+  <link rel="stylesheet" href="styles/main.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Domine&family=Merriweather&family=Tinos&family=Lora&display=swap" rel="stylesheet" />
+
+  <script>
+    const root = document.documentElement;
+    const font = localStorage.getItem('napt-font');
+    const theme = localStorage.getItem('napt-theme');
+    const contrast = localStorage.getItem('napt-contrast');
+    const useEmojis = localStorage.getItem('napt-use-emojis');
+    if (font) root.classList.add(`font-${font}`);
+    if (theme === 'dark') root.classList.add('theme-dark');
+    if (contrast === 'true') root.classList.add('theme-high-contrast');
+    if (useEmojis === 'false') root.classList.add('no-emojis');
+  </script>
+
+  <style>
+    .debug-banner {
+      background: #aa0000;
+      color: white;
+      font-weight: bold;
+      text-align: center;
+      padding: 0.5rem;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="debug-banner">
+    ⚠️ You are using <strong>index-original.html</strong> — fallback to Site2 is disabled.
+  </div>
+
+  <header>
+    <h1>NAPT Word Game (Original Debug)</h1>
+    <p>Testing original scripts only. If something breaks, fallback won't occur.</p>
+  </header>
+
+  <main id="menu" class="active">
+    <section class="mode-buttons">
+      <button class="menu-btn" data-mode="regular">🧠 Solo Mode</button>
+      <button class="menu-btn" data-mode="wordRelic">🏺 Word Relic</button>
+      <button class="menu-btn" data-mode="wordSafari">🦁 Word Safari</button>
+      <button class="menu-btn" data-mode="dice">🎲 Dice Challenge</button>
+      <button class="menu-btn" data-mode="atlas">🗺️ Word Atlas</button>
+      <button class="menu-btn" data-mode="trail">🪄 Trail of Letters</button>
+      <button class="menu-btn" data-mode="versus">🤖 Play vs Computer</button>
+      <button class="menu-btn" data-mode="nearby">📍 Play Nearby</button>
+    </section>
+  </main>
+
+  <section id="game" class="game-container"></section>
+
+  <footer>
+    <a href="scripts/utils/error-log.html" target="_blank">🐞 View Error Log</a>
+  </footer>
+
+  <!-- Load from original scripts only -->
+  <script type="module">
+    import './scripts/main.js';
+    import './scripts/gameNavigation.js';
+  </script>
+
+  <script src="scripts/serviceWorkerRegistration.js"></script>
+</body>
+</html>
+
