@@ -1,0 +1,61 @@
+<!-- Timestamp: 2025-05-27 16:25 -->
+<!-- File: scripts/utils/version-log.html -->
+<!-- MIT License — https://github.com/AllieBaig/WordAtlas/blob/main/LICENSE -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Version Log Viewer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="../../styles/error-log.css" />
+  <style>
+    .version-log {
+      padding: 1rem;
+      background: #111;
+      color: #eee;
+      font-family: monospace;
+      max-width: 800px;
+      margin: auto;
+    }
+    .entry {
+      border-bottom: 1px solid #444;
+      margin-bottom: 1em;
+      padding-bottom: 0.5em;
+    }
+    .entry time {
+      color: #ffc107;
+    }
+    .entry code {
+      color: #0f0;
+    }
+  </style>
+</head>
+<body>
+
+  <h1 style="text-align:center;">📜 Version Log</h1>
+  <div class="version-log" id="log">Loading log...</div>
+
+  <script type="module">
+    async function loadLog() {
+      const container = document.getElementById('log');
+      try {
+        const res = await fetch('./version-log.json');
+        const log = await res.json();
+        container.innerHTML = log.map(entry => `
+          <div class="entry">
+            <time>${entry.timestamp}</time><br/>
+            <code>${entry.file}</code><br/>
+            <p>${entry.note}</p>
+          </div>
+        `).join('');
+      } catch (err) {
+        container.textContent = '⚠️ Failed to load version log.';
+        console.error(err);
+      }
+    }
+
+    loadLog();
+  </script>
+</body>
+</html>

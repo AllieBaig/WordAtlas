@@ -1,0 +1,122 @@
+<!-- File: scripts/utils/error-log.html -->
+<!-- MIT License — https://github.com/AllieBaig/WordAtlas/blob/main/LICENSE -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Error Log Viewer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      margin: 0;
+      padding: 1rem;
+      background: #111;
+      color: #eee;
+    }
+    h1 {
+      text-align: center;
+      color: #ffc107;
+    }
+    .controls {
+      text-align: center;
+      margin-bottom: 1em;
+    }
+    .controls button {
+      margin: 0.25em;
+      padding: 0.5em 1em;
+      font-size: 0.9rem;
+      background: #333;
+      color: #fff;
+      border: 1px solid #666;
+      border-radius: 0.4em;
+      cursor: pointer;
+    }
+    .log-output {
+      max-height: 60vh;
+      overflow-y: auto;
+      background: #222;
+      padding: 1em;
+      border-radius: 0.5em;
+    }
+    .log-entry {
+      border-bottom: 1px solid #444;
+      margin-bottom: 1em;
+      padding-bottom: 0.5em;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .log-entry strong {
+      color: #ff6;
+    }
+    .footer {
+      text-align: center;
+      margin-top: 2em;
+      font-size: 0.8em;
+      opacity: 0.5;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>⚠️ Error Log Viewer</h1>
+
+  <div class="controls">
+    <button onclick="loadLog('today')">Today</button>
+    <button onclick="loadLog('week')">This Week</button>
+    <button onclick="loadLog('month')">This Month</button>
+    <button onclick="clearLog()">🧹 Clear Log</button>
+    <button onclick="generateTestErrors()">💥 Generate Test Errors</button>
+  </div>
+
+  <div id="log" class="log-output">Loading errors...</div>
+
+  <div class="footer" id="version"></div>
+
+  <script type="module">
+    import { getErrorLog, clearErrorLog } from './errorHandler.js';
+    import { getVersionLabel } from './version.js';
+
+    function format(entries) {
+      if (!entries.length) return '<p>No errors found.</p>';
+      return entries.map(e => `
+        <div class="log-entry">
+          <strong>${e.type}</strong>: ${e.message}<br/>
+          <em>${e.source} [${e.lineno}:${e.colno}]</em><br/>
+          <small>${e.time}</small><br/>
+          <pre>${e.stack}</pre>
+        </div>
+      `).join('');
+    }
+
+    window.loadLog = (range) => {
+      const entries = getErrorLog(range);
+      document.getElementById('log').innerHTML = format(entries);
+    };
+
+    window.clearLog = () => {
+      if (confirm('Clear all stored error logs?')) {
+        clearErrorLog();
+        loadLog('today');
+      }
+    };
+
+    window.generateTestErrors = () => {
+      // Simulated syntax error
+      try {
+        eval('let a = }');
+      } catch (e) {
+        console.error('Triggered Syntax Error:', e);
+      }
+
+      // Simulated runtime error
+      Promise.reject(new Error('Test unhandled rejection'));
+    };
+
+    // Init
+    loadLog('today');
+    document.getElementById('version').textContent = getVersionLabel();
+  </script>
+</body>
+</html>

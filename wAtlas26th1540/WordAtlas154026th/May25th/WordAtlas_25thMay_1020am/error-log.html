@@ -1,0 +1,99 @@
+<!-- File: scripts/utils/error-log.html -->
+<!-- MIT License — https://github.com/AllieBaig/WordAtlas/blob/main/LICENSE -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>🪲 Error Log Viewer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body {
+      font-family: monospace;
+      background: #111;
+      color: #eee;
+      padding: 1rem;
+    }
+    h2 {
+      color: #0ff;
+    }
+    button {
+      margin: 0.5rem 0;
+      padding: 0.4rem 0.8rem;
+      font-size: 0.9rem;
+    }
+    .entry {
+      border-left: 4px solid #444;
+      padding: 0.6rem;
+      margin-bottom: 1rem;
+      background: #222;
+      border-radius: 6px;
+    }
+    .entry.moduleexport {
+      background: #330;
+      border-left-color: orange;
+    }
+    .entry.moduleload {
+      background: #301010;
+      border-left-color: crimson;
+    }
+    pre {
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .legend {
+      font-size: 0.85rem;
+      margin-bottom: 1rem;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>📋 Error Log</h2>
+  <div class="legend">
+    <strong>Legend:</strong>
+    <span style="color:orange;">ModuleExport</span> = missing export<br />
+    <span style="color:crimson;">ModuleLoad</span> = failed to load module<br />
+    <span style="color:#aaa;">Other</span> = misc runtime errors
+  </div>
+
+  <button onclick="clearLog()">🧹 Clear Log</button>
+
+  <div id="log"></div>
+
+  <script type="module">
+    import { getErrorLog, clearErrorLog } from './errorHandler.js';
+
+    function renderLog() {
+      const container = document.getElementById('log');
+      const errors = getErrorLog().reverse();
+
+      if (!errors.length) {
+        container.innerHTML = '<p>No errors logged.</p>';
+        return;
+      }
+
+      container.innerHTML = errors.map(e => {
+        const typeClass = e.type?.toLowerCase() || '';
+        return `
+          <div class="entry ${typeClass}">
+            <strong>${e.type?.toUpperCase() || 'ERROR'}:</strong> ${e.message}<br/>
+            <small>${e.source || ''} [${e.lineno || ''}:${e.colno || ''}]</small><br/>
+            ${e.stack ? `<pre>${e.stack}</pre>` : ''}
+            <em>${e.time}</em>
+          </div>
+        `;
+      }).join('');
+    }
+
+    window.clearLog = () => {
+      if (confirm('Clear all stored error logs?')) {
+        clearErrorLog();
+        renderLog();
+      }
+    };
+
+    renderLog();
+  </script>
+
+</body>
+</html>

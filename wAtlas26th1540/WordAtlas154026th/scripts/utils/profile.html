@@ -1,0 +1,90 @@
+
+
+<!-- File: scripts/utils/profile.html -->
+<!-- MIT License — https://github.com/AllieBaig/WordAtlas/blob/main/LICENSE -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Profile</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      background: #1b1b1b;
+      color: #f0f0f0;
+      text-align: center;
+      padding: 2em;
+    }
+    .profile-box {
+      background: #292929;
+      padding: 2em;
+      border-radius: 1em;
+      box-shadow: 0 0 1em #000;
+      display: inline-block;
+      max-width: 90%;
+    }
+    .qr {
+      margin-top: 1em;
+    }
+    button {
+      background: #444;
+      color: white;
+      border: none;
+      padding: 0.6em 1.2em;
+      margin: 1em;
+      font-size: 1em;
+      border-radius: 0.4em;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #666;
+    }
+  </style>
+</head>
+<body>
+  <div class="profile-box">
+    <h1>👤 Profile</h1>
+    <p><strong>Nickname:</strong> <span id="nickname">...</span></p>
+    <p><strong>Profile ID:</strong> <span id="profileId">...</span></p>
+    <p><strong>XP:</strong> <span id="xp">0</span></p>
+    <p><strong>Streak:</strong> <span id="streak">0</span></p>
+    <div class="qr">
+      <canvas id="qrCanvas"></canvas>
+    </div>
+    <button onclick="exportProfile()">📋 Copy Profile JSON</button>
+  </div>
+
+  <script type="module">
+    import { getStoredProfile } from './profileManager.js';
+    import QRCode from 'https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.esm.min.js';
+
+    const profile = getStoredProfile();
+
+    if (profile) {
+      document.getElementById('nickname').textContent = profile.nickname;
+      document.getElementById('profileId').textContent = profile.id;
+      document.getElementById('xp').textContent = profile.stats?.xp || 0;
+      document.getElementById('streak').textContent = profile.stats?.streak || 0;
+
+      QRCode.toCanvas(document.getElementById('qrCanvas'), profile.id, {
+        width: 160,
+        margin: 1,
+        color: {
+          dark: '#fff',
+          light: '#1b1b1b'
+        }
+      });
+    }
+
+    window.exportProfile = function () {
+      const data = JSON.stringify(profile, null, 2);
+      navigator.clipboard.writeText(data)
+        .then(() => alert('✅ Profile JSON copied!'))
+        .catch(() => alert('❌ Failed to copy.'));
+    };
+  </script>
+</body>
+</html>
+
