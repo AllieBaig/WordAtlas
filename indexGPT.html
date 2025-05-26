@@ -1,2 +1,63 @@
 
-dh
+
+<!-- File: index.html -->
+<!-- MIT License — https://github.com/AllieBaig/WordAtlas/blob/main/LICENSE -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0055aa" />
+  <meta name="description" content="WordAtlas – A modular, multilingual word game PWA" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="stylesheet" href="styles/main.css" />
+  <link rel="icon" href="icons/icon-192.png" type="image/png" />
+  <title>WordAtlas</title>
+</head>
+<body>
+
+  <header>
+    <h1>🧭 WordAtlas</h1>
+    <p>Explore words, culture & language — one game at a time.</p>
+  </header>
+
+  <main id="menu" class="active">
+    <section class="mode-buttons">
+      <button class="menu-btn" data-mode="regular">🧠 Solo Mode</button>
+      <button class="menu-btn" data-mode="wordRelic">🏺 Word Relic</button>
+      <button class="menu-btn" data-mode="wordSafari">🦁 Word Safari</button>
+      <button class="menu-btn" data-mode="dice">🎲 Dice Challenge</button>
+      <button class="menu-btn" data-mode="atlas">🗺️ Word Atlas</button>
+      <button class="menu-btn" data-mode="trail">🪄 Trail of Letters</button>
+      <button class="menu-btn" data-mode="versus">🤖 Play vs Computer</button>
+      <button class="menu-btn" data-mode="nearby">📍 Play Nearby</button>
+      <button class="menu-btn" data-mode="mixlingo">🌍 MixLingo</button>
+    </section>
+  </main>
+
+  <div id="game" class="game-container hidden"></div>
+
+  <footer>
+    <div id="settingsPanel" class="hidden"></div>
+    <div id="toolsPanel" class="hidden"></div>
+
+    <div class="easy-mode-toggle">
+      <label>
+        <input type="checkbox" id="easyToggle" />
+        🌟 Easy Mode
+      </label>
+    </div>
+
+    <p style="font-size: 0.85em; opacity: 0.6;">
+      © 2025 AllieBaig — WordAtlas is a modular PWA for language exploration.
+    </p>
+  </footer>
+
+  <!-- App Scripts -->
+  <script type="module" src="scripts/main.js"></script>
+  <script src="scripts/serviceWorkerRegistration.js"></script>
+</body>
+</html>
+
+
