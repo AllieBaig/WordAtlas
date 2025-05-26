@@ -1,0 +1,59 @@
+
+/* File: styles/error-log.css */
+/* MIT License — https://github.com/AllieBaig/WordAtlas/blob/main/LICENSE */
+
+body {
+  font-family: system-ui, sans-serif;
+  background: #111;
+  color: #eee;
+  margin: 0;
+  padding: 1rem;
+}
+
+h1 {
+  color: #ffc107;
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.controls {
+  text-align: center;
+  margin-bottom: 1em;
+}
+
+.controls button {
+  margin: 0.25em;
+  padding: 0.5em 1em;
+  font-size: 0.9rem;
+  background: #333;
+  color: #fff;
+  border: 1px solid #666;
+  border-radius: 0.4em;
+  cursor: pointer;
+}
+
+.log-output {
+  max-height: 60vh;
+  overflow-y: auto;
+  background: #222;
+  padding: 1em;
+  border-radius: 0.5em;
+}
+
+.log-entry {
+  border-bottom: 1px solid #444;
+  margin-bottom: 1em;
+  padding-bottom: 0.5em;
+  white-space: pre-wrap;
+}
+
+.log-entry strong {
+  color: #ff6;
+}
+
+.footer {
+  text-align: center;
+  margin-top: 2em;
+  font-size: 0.8em;
+  opacity: 0.5;
+}
