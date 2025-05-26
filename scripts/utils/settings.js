@@ -8,7 +8,7 @@
  * Also logs time taken from page load to interactive mode.
  */
 
-// --- Essential Core App Initializations ---
+// --- Essential Core App Initializations --- //
 // These functions apply saved settings, initialize UI components, and bind core events.
 // NOTE: Imports and calls related to settings are adjusted based on your latest settings.js
 import { getSettings, injectSettingsPanel, setFont, toggleEasyMode } from './utils/settings.js'; // Updated imports from settings.js
