@@ -1,34 +1,71 @@
 
-
 // File: scripts/utils/eventBinder.js
-// Features:
-// - Safely add event listeners and remove them all on cleanup
-// - Prevents double bindings and memory leaks
-// - Reusable across modes and settings panels
-//
-// License: MIT — https://github.com/AllieBaig/WordAtlas/blob/main/LICENSE
-
-const listeners = [];
+// Edited by Gemini (Added bindGameButtons export)
+// MIT License — https://github.com/AllieBaig/WordAtlas/blob/main/LICENSE
 
 /**
- * Binds an event and tracks it for cleanup
- * @param {Element} el
- * @param {string} type
- * @param {Function} handler
+ * Event Binder Utility
+ * Prevents duplicate listeners and supports delegated event handling.
+ * Ideal for binding menu buttons, footer toggles, settings controls.
  */
-export function bind(el, type, handler) {
-  if (!el) return;
-  el.addEventListener(type, handler);
-  listeners.push({ el, type, handler });
-}
+
+const boundEvents = new WeakMap();
 
 /**
- * Remove all tracked event listeners
+ * Binds a safe event listener that avoids duplicates.
+ * @param {Element} el - Target DOM element
+ * @param {string} type - Event type (e.g., 'click')
+ * @param {Function} handler - Function to execute
  */
-export function clearAllBindings() {
-  for (const { el, type, handler } of listeners) {
-    el.removeEventListener(type, handler);
+export function bindEvent(el, type, handler) {
+  if (!el || typeof handler !== 'function') return;
+
+  const key = `${type}`;
+
+  if (!boundEvents.has(el)) {
+    boundEvents.set(el, new Map());
   }
-  listeners.length = 0;
+
+  const handlers = boundEvents.get(el);
+  if (handlers.has(key)) {
+    el.removeEventListener(type, handlers.get(key));
+  }
+
+  el.addEventListener(type, handler);
+  handlers.set(key, handler);
 }
 
+/**
+ * Delegated event binding using selectors
+ * @param {Element} parent - Parent container (e.g., document)
+ * @param {string} selector - Target child selector
+ * @param {string} type - Event type
+ * @param {Function} handler - Callback with (event, matchedElement)
+ */
+export function bindDelegated(parent, selector, type, handler) {
+  if (!parent || typeof handler !== 'function') return;
+
+  parent.addEventListener(type, (e) => {
+    const target = e.target.closest(selector);
+    if (target && parent.contains(target)) {
+      handler(e, target);
+    }
+  });
+}
+
+// Import navigateToMode to use it for binding game buttons
+import { navigateToMode } from '../gameNavigation.js';
+
+/**
+ * Binds click listeners to main menu game mode buttons using delegated events.
+ * This is the function main.js expects to import.
+ */
+export function bindGameButtons() {
+    bindDelegated(document, '.menu-btn', 'click', (event, target) => {
+        const mode = target.dataset.mode;
+        if (mode) {
+            navigateToMode(mode);
+        }
+    });
+    console.log('✅ Game menu buttons bound.');
+}
