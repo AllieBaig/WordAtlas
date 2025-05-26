@@ -121,3 +121,11 @@ document.addEventListener('DOMContentLoaded', () => {
   console.log(`⚡ WordAtlas UI loaded in ${loadTime}ms`);
 });
 
+import { toggleSettingsPanel } from './utils/settings.js';
+import { toggleToolsPanel } from './utils/debugTools.js';
+
+document.getElementById('toggleSettings')?.addEventListener('click', toggleSettingsPanel);
+document.getElementById('toggleTools')?.addEventListener('click', toggleToolsPanel);
+
+
+
