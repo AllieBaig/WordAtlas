@@ -1,7 +1,3 @@
-
-
-
-<!-- 25th, 07:10, File: index.html -->
 <!-- File: index.html -->
 <!-- MIT License — https://github.com/AllieBaig/WordAtlas/blob/main/LICENSE -->
 
@@ -11,7 +7,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#0055aa" />
-  <meta name="description" content="WordAtlas – A modular, multilingual word game PWA" />
+  <meta name="description" content="WordAtlas – A modular PWA for word and language learning" />
   <link rel="manifest" href="manifest.json" />
   <link rel="stylesheet" href="styles/main.css" />
   <link rel="icon" href="icons/icon-192.png" type="image/png" />
@@ -21,7 +17,7 @@
 
   <header>
     <h1>🧭 WordAtlas</h1>
-    <p>Explore words, culture & language — one game at a time.</p>
+    <p>Explore words, culture & language — one mode at a time.</p>
   </header>
 
   <main id="menu" class="active">
@@ -41,18 +37,20 @@
   <div id="game" class="game-container hidden"></div>
 
   <footer>
-    <div id="settingsPanel" class="hidden"></div>
-    <div id="toolsPanel" class="hidden"></div>
-
-    <div class="easy-mode-toggle">
-      <label>
+    <div class="footer-panel">
+      <button id="toggleSettings">⚙️ Settings</button>
+      <button id="toggleTools">🛠️ Tools</button>
+      <label class="easy-mode-toggle">
         <input type="checkbox" id="easyToggle" />
         🌟 Easy Mode
       </label>
     </div>
 
-    <p style="font-size: 0.85em; opacity: 0.6;">
-      © 2025 AllieBaig — WordAtlas is a modular PWA for language exploration.
+    <div id="settingsPanel" class="hidden"></div>
+    <div id="toolsPanel" class="hidden"></div>
+
+    <p style="font-size: 0.85em; opacity: 0.6; text-align: center;">
+      © 2025 AllieBaig — WordAtlas is a modular, multilingual word game PWA.
     </p>
   </footer>
 
@@ -61,5 +59,3 @@
   <script src="scripts/serviceWorkerRegistration.js"></script>
 </body>
 </html>
-
-
